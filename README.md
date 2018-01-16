@@ -1,10 +1,12 @@
 # quicktemplate.vim :rocket:
 ### Better Vim syntax highlighting for [Quicktemplate](https://github.com/valyala/quicktemplate)
-##### :warning::construction: This plugin is a work in progress :construction::warning:
+##### :warning: :construction: This plugin is a work in progress :construction: :warning:
 
-Quicktemplate is a compiled templating engine for Go. 
+Quicktemplate is a compiled templating engine for Go.
+
 It has a unique syntax where all top-level text is considered a comment by default,
 and directives wrapped in pairs of `{%` `%}` are used to specify desired behavior.
+
 Many of these directives allow for embedded HTML or Go code, making good syntax 
 highlighting support vital for effective and efficient development of templates.
 
@@ -13,7 +15,7 @@ highlighting support vital for effective and efficient development of templates.
 Install as you would any other plugin using your preferred plugin manager. 
 
 I use dein: 
-```vimscript
+```viml
 call dein#add('b0o/quicktemplate.vim')
 ```
 
