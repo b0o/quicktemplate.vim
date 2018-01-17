@@ -1,13 +1,14 @@
 This is a test template file.
 All the lines outside func and code are just comments.
 
-{% var a string := "asd"%}
+{%f
+u unc var a string := "asd"%}
 
 Foo
 
 TODO: Foobar
 
-{%=h
+{%qz e
 package main // TODO: foobar
 var a = "asd"
 /*
@@ -30,6 +31,13 @@ Qux
 
 asd
 
+Optional imports must be at the top of template
+{% import (
+	"fmt"
+	"strconv"
+)
+%}
+
 {%z= func sasd(a string, b, c int, cb func(a, b int) (string, int)) %}
 <pre>
 	package main
@@ -39,56 +47,20 @@ asd
 </pre>
 {% endfunc %}
 
-Bar
-
-{%s= var a string = "asd"
-var l = f
-z := 0xF00F // TODO
-%}
-
 Page prints a page implementing Page interface.
 {% func foo(i, j int) %}
-<html>
-	<head>
-		<title>
-			{%= p.Title() %}
-		</title>
-	</head>
-	<script type="text/javascript">
-		var a = "{%= p.Title() %}";
-		var b = window.location.href;
-		console.log(`A: ${a} -- ${b}`);
-	</script>
-	<!-- Base Styles -->
-	<style type="text/css">
-		body {
-			font-family: monospace;
-			font-size: {% p.FontSize() %}pt;
-			color: #111;
-			background-color: #eee;
-		}
-	</style>
-	<body>
-		<div>
-			<a href="{% p.Prev() %}">return to previous page</a>
-		</div>
-		{%=
-			p.Body()
-		%}
-	</body>
-</html>
+<body>
+	<div>
+		<a href="/">return to home page</a>
+	</div>
+	{%= p.Body() %}
+</body>
 {% endfunc %}
 
 Optional package name must be at the top of template.
 By default package name is identical to the current folder name.
 {% package templates %}
 
-Optional imports must be at the top of template
-{% import (
-	"fmt"
-	"strconv"
-)
-%}
 
 // Arbitrary go code may be inserted here. For instance, type definition:
 {% code
