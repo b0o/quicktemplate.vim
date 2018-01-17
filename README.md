@@ -14,7 +14,7 @@ highlighting support vital for effective and efficient development of templates.
 
 Install as you would any other plugin using your preferred plugin manager. 
 
-I use dein: 
+I use [dein](https://github.com/Shougo/dein.vim): 
 ```viml
 call dein#add('b0o/quicktemplate.vim')
 ```
