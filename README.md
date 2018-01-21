@@ -12,11 +12,13 @@ highlighting support vital for effective and efficient development of templates.
 
 ### Installation
 
-Install as you would any other plugin using your preferred plugin manager. 
+`quicktemplate.vim` depends on an external plugin called [`builder.vim`](https://github.com/b0o/builder.vim), which you must
+also install.
 
-I use [dein](https://github.com/Shougo/dein.vim): 
+Using [dein](https://github.com/Shougo/dein.vim): 
 ```viml
-call dein#add('b0o/quicktemplate.vim')
+call dein#add('b0o/builder.vim')
+call dein#add('b0o/quicktemplate.vim', {'depends': 'b0o/builder.vim'})
 ```
 
 ### Known Issues
