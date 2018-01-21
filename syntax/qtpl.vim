@@ -50,9 +50,9 @@ let s:pats.blocks.interfaceTag  = 'interface'
 let s:pats.plainTagMods =
 \ s:pb.grp(
   \ s:pb.agrp(
-    \ s:pb.agrp(['s', 'd', 'f', 'v', 'z']),
+    \ s:pb.agrp('s', 'd', 'f', 'v', 'z'),
     \ s:pb.grp(
-      \ s:pb.agrp(['q', 'j', 'u']),
+      \ s:pb.agrp('q', 'j', 'u'),
       \ s:pb.opt('z')
     \ ),
   \ ),
