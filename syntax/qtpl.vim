@@ -5,130 +5,30 @@ if exists("b:current_syntax")
   finish
 endif
 
-" syn case match
-
-" Define embedded syntaxes
+" Load embedded syntaxes
 syn include @qtplGo   syntax/go.vim
 unlet! b:current_syntax
-
 syn include @qtplHtml syntax/html.vim
 unlet! b:current_syntax
 
-" Everything in the outermost scope is considered a comment
-syn region  qtpl_region_outer start=/\%^/ end=/\%$/ contains=CONTAINED
+" Instantiate new builder objects
+let s:pb = pb#new('+')
+let s:sb = sb#new('qtpl_')
 
-" Keywords like TODO in the outer region
-syn keyword qtpl_keyword_todo contained    containedby=qtpl_region_outer    TODO FIXME XXX BUG NOTE
-
-" Pattern builder utility functions
-let s:pb = {}
-
-" Delimiter for patterns generated with s:make_pat
-" Delimits the start and end of the pattern, and cannot
-" appear anywhere within the pattern
-let s:pb.delim = '+'
-
-" Join a list of patterns with the given separator
-func! s:pb.join(ps, s)
-  return join(a:ps, a:s)
-endfunc
-
-" Wrap the given pattern with an open and close pattern
-func! s:pb.wrap(o, p, c)
-  return a:o . a:p . a:c
-endfunc
-
-" grp: group
-" Given a variadic number of patterns as arguments,
-" join them and wrap with group delimiters
-" Boolean AND
-func! s:pb.grp(...)
-  return s:pb.lgrp(a:000)
-endfunc
-
-" lgrp: list group
-" Given a list of atoms, combine them into a group
-" Boolean AND
-func! s:pb.lgrp(ps)
-  return s:pb.wrap('\(', s:pb.join(a:ps, ''), '\)')
-endfunc
-
-" Group which matches any atom given a list of patterns
-" Boolean OR
-func! s:pb.agrp(ps)
-  return s:pb.grp(s:pb.join(a:ps, '\|'))
-endfunc
-
-" Given a list of atoms, combine them into a collection of atoms
-" See :h E69
-func! s:pb.col(ps)
-  return s:pb.wrap('\[', s:pb.join(a:ps, ''), ']')
-endfunc
-
-" Given a list of atoms, combine them into a sequence of optional
-" atoms
-" See :h E69
-func! s:pb.seq(ps)
-  return s:pb.wrap('\%[', s:pb.join(a:ps, ''), ']')
-endfunc
-
-" Matches {min,max} of the specified atom
-" See :h /multi
-func! s:pb.multi(p, min, max)
-  return s:pb.join([a:p, '\{', a:min, ',', a:max, '}'], '')
-endfunc
-
-" Matches 0 or 1 of the specified atom (greedy)
-func! s:pb.opt(p)
-  return a:p . '\?'
-endfunc
-
-" Positive lookahead
-func! s:pb.pla(p)
-  return a:p . '\@='
-endfunc
-
-" Negative lookahead
-func! s:pb.nla(p)
-  return a:p . '\@!'
-endfunc
-
-" Positive lookbehind
-func! s:pb.plb(p)
-  return a:p . '\@<='
-endfunc
-
-" Negative lookbehind
-func! s:pb.nlb(p)
-  return a:p . '\@<!'
-endfunc
-
-" NO-OP
-" returns empty string
-func! s:pb.nop(...)
-  return ''
-endfunc
-
-" Passthrough
-" returns first argument
-func! s:pb.pt(a)
-  return a:a
-endfunc
-
-" Joins a variable number of pattern pieces together
-" between pattern delimiters to create a complete pattern
-func! s:pb.make(...)
-  return s:pb.wrap(s:pb.delim, s:pb.join(extend(['\C'], a:000), ''), s:pb.delim)
-endfunc
+""" PATTERNS
 
 " Building blocks of patterns for Quicktemplate syntax
-let s:pats        = {}
-let s:pats.blocks = {}
+let s:pats                      = {}
+
+let s:pats.bof                  = '\%^'
+let s:pats.eof                  = '\%$'
 
 let s:pats.tagOpen              = '{%'
 let s:pats.tagClose             = '%}'
 
 let s:pats.blockEnd             = 'end'
+
+let s:pats.blocks               = {}
 
 let s:pats.blocks.func          = 'func'
 let s:pats.blocks.comment       = 'comment'
@@ -147,89 +47,106 @@ let s:pats.blocks.interfaceTag  = 'interface'
 
 " Modifiers for tags which specify output behavior of the tag
 " Similar to printf verbs
-let s:pats.plainTagMods = s:pb.agrp([
-  \ s:pb.agrp(['d', 'f', 'v', 'z']),
-  \ s:pb.grp(
-    \ s:pb.agrp(['q', 'j', 'u']),
-    \ s:pb.opt('z')
-  \ )
-\ ])
+let s:pats.plainTagMods =
+\ s:pb.grp(
+  \ s:pb.agrp(
+    \ s:pb.agrp(['s', 'd', 'f', 'v', 'z']),
+    \ s:pb.grp(
+      \ s:pb.agrp(['q', 'j', 'u']),
+      \ s:pb.opt('z')
+    \ ),
+  \ ),
+  \ s:pb.opt('=')
+\ )
 
 " Modifiers for func tags which specify output behavior of the tag
 " Similar to printf verbs
-let s:pats.funcTagMods = s:pb.grp(
+let s:pats.funcTagMods =
+\ s:pb.grp(
   \ '=',
-  \ s:pb.opt(s:pb.agrp(['q', 'j', 'u'])),
+  \ s:pb.opt(s:pb.agrp('q', 'j', 'u')),
   \ s:pb.opt('h')
 \ )
 
+""" SYNTAX
 
-" Syntax builder
-let s:sb = { 'prefix': 'qtpl_' }
-
-" Builds a 'syntax match ...' command
-func! s:sb.match(name, pat, ...)
-  return {
-  \ 'name': s:sb.prefix . a:name,
-  \ 'pat':  a:pat,
-  \ 'opts': a:000,
-  \ 'cmd':  join(['syn match', s:sb.prefix . a:name, a:pat, join(a:000, ' ')], ' ')
-  \ }
-endfunc
-
-" A disabled match
-func! s:sb.xmatch(...)
-  return {
-  \ 'name': '',
-  \ 'pat':  '',
-  \ 'opts': [],
-  \ 'cmd':  ''
-  \ }
-endfunc
-
-" Object which holds all syntax definitions
-let s:syns = {}
-let s:syns.objs = []
-
-" Push a new obj (from sb) onto the list
-func! s:syns.push(...)
-  call extend(s:syns.objs, a:000)
-endfunc
-
-" Execute all syntax commands in syns.objs
-func! s:syns.exec()
-  for l:obj in s:syns.objs
-    execute l:obj.cmd
-  endfor
-endfunc
-
-call s:syns.push(
-  \ s:sb.match('tag_open',
-    \ s:pb.make(s:pats.tagOpen),
-    \ 'contained'
-  \ ),
-  \ s:sb.match('tag_mods_error',
-    \ s:pb.make(
-      \ s:pb.plb(s:pb.grp(s:pats.tagOpen)),
-      \ s:pb.nla(s:pb.grp(s:pb.agrp([s:pats.plainTagMods, s:pats.funcTagMods]), '\_s')),
-      \ '\S\+',
-      \ s:pb.pla('\_s')
-    \ ),
-    \ 'contained'
-  \ ),
-  \ s:sb.match('tag_mods_plain',
-    \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.plainTagMods, s:pb.pla('\_s')),
-    \ 'contained'
-  \ ),
-  \ s:sb.match('tag_mods_func',
-    \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.funcTagMods, s:pb.pla('\_s')),
-    \ 'contained'
-  \ ),
-  \ s:sb.match('tag_close',
-    \ s:pb.make(s:pats.tagClose),
-    \ 'contained'
-  \ )
+" Everything in the outermost scope is considered a comment
+call s:sb.region('region_outer',
+  \ s:pb.make(s:pats.bof),
+  \ s:pb.make(s:pats.eof),
+  \ 'contains=CONTAINED'
 \ )
+
+" Keywords like TODO in the outer region
+call s:sb.keyword('keyword_todo',
+  \ 'contained',
+  \ 'containedby=' . s:sb.ref('region_outer'),
+  \ 'TODO FIXME XXX BUG NOTE'
+\ )
+
+" Opening sequence for qtpl tags
+" Ex:
+" {%=uh Foo() %}
+" ^^
+call s:sb.match('tag_open',
+  \ s:pb.make(s:pats.tagOpen),
+  \ 'contained'
+\ )
+
+" Closing sequence for qtpl tags
+" Ex:
+" {%=uh Foo() %}
+"             ^^
+call s:sb.match('tag_close',
+  \ s:pb.make(s:pats.tagClose),
+  \ 'contained'
+\ )
+
+" Modifiers which can appear after an
+" opening sequence of an opening qtpl tag
+" of the plain catagory (TODO: Reword this)
+" Closing sequence for qtpl tags
+" Ex:
+" {%s= mystr %}
+"   ^^
+call s:sb.match('tag_mods_plain',
+  \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.plainTagMods, s:pb.pla('\_s')),
+  \ 'contained'
+\ )
+
+" Modifiers which can appear after an
+" opening sequence of an opening qtpl
+" function call tag
+" Ex:
+" {%=uh myFunc() %}
+"   ^^^
+call s:sb.match('tag_mods_func',
+  \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.funcTagMods, s:pb.pla('\_s')),
+  \ 'contained'
+\ )
+
+" Any invalid sequence adjacent to an
+" opening qtpl tag sequence
+" Ex:
+" {%nope myFunc() %}
+"   ^^^^
+" TODO: shouldn't match in cases where a valid
+" tag keyword is directly adjacent to its opening
+" tag sequence in certain cases
+" Ex: (should not match)
+" {%plain%}
+call s:sb.match('tag_mods_error',
+  \ s:pb.make(
+    \ s:pb.plb(s:pb.grp(s:pats.tagOpen)),
+    \ s:pb.nla(s:pb.grp(s:pb.agrp(s:pats.plainTagMods, s:pats.funcTagMods), '\_s')),
+    \ '\S\+',
+    \ s:pb.pla('\_s')
+  \ ),
+  \ 'contained'
+\ )
+
+call s:sb.exec()
+
       " \ s:pb.nla(s:pb.grp(s:pb.agrp([s:pats.plainTagMods, s:pats.funcTagMods]), '\S')),
       " \ s:pb.nla(s:pb.grp(s:pb.agrp([s:pats.plainTagMods, s:pats.funcTagMods]), '\S')),
 
@@ -239,9 +156,8 @@ call s:syns.push(
   "   \ s:pb.make(pb.pla(s:pats.tagOpen), s:pats.plainTagMods),
   "   \ 'contained'
   " \ ),
-call s:syns.exec()
 
-let g:foo = s:syns
+" let g:foo = s:syns
 
 hi def link qtpl_region_outer           Comment
 hi def link qtpl_keyword_todo           Underlined

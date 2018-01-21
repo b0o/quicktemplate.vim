@@ -1,7 +1,7 @@
 This is a test template file.
 All the lines outside func and code are just comments.
 
-{%f
+{%=q
 u unc var a string := "asd"%}
 
 Foo
