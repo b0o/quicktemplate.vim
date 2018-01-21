@@ -1,0 +1,20 @@
+{% package foobar %}
+
+{% plain %}
+plain
+{% endplain %}
+
+{% interface bar {
+	Foo()
+} %}
+
+{% code
+var a = "foo"
+%}
+
+{% func abc() %}
+	{% cat "./foo.txt" %}
+	{%s math.complex(math.pi/2) %}
+	{%= time.Now() %}
+	%}
+{% endfunc %}
