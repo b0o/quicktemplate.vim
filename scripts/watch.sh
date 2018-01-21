@@ -24,9 +24,6 @@ done
 exit 1
 }
 
-
-# sh -c "echo $watch | entr -p kill $cpids" &
-
 while true; do
 	inotifywait $watch -e CREATE,MODIFY,DELETE
 	cpids="$(ps --ppid $ppid --format=pid --no-headers | grep -v $pid)"
