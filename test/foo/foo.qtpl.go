@@ -2,84 +2,103 @@
 // See https://github.com/valyala/quicktemplate for details.
 
 //line foo.qtpl:1
-package foobar
+package foo
 
-// plain
+// plain on the top level becomes
+// a go comment
 
-//line foo.qtpl:7
+//line foo.qtpl:8
 import (
 	qtio422016 "io"
 
 	qt422016 "github.com/valyala/quicktemplate"
 )
 
-//line foo.qtpl:7
+//line foo.qtpl:8
 var (
 	_ = qtio422016.Copy
 	_ = qt422016.AcquireByteBuffer
 )
 
-//line foo.qtpl:7
+//line foo.qtpl:8
 type bar interface {
-	//line foo.qtpl:7
+	//line foo.qtpl:8
 	Foo() string
-	//line foo.qtpl:7
+	//line foo.qtpl:8
 	StreamFoo(qw422016 *qt422016.Writer)
-	//line foo.qtpl:7
+	//line foo.qtpl:8
 	WriteFoo(qq422016 qtio422016.Writer)
-//line foo.qtpl:7
+//line foo.qtpl:8
 }
 
-//line foo.qtpl:12
+//line foo.qtpl:13
 var a = "foo"
 
-//line foo.qtpl:15
+//line foo.qtpl:16
 func streamabc(qw422016 *qt422016.Writer) {
-	//line foo.qtpl:15
+	//line foo.qtpl:16
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:16
+	//line foo.qtpl:17
 	qw422016.N().S(`Hello World
 `)
-	//line foo.qtpl:16
+	//line foo.qtpl:17
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:17
+	//line foo.qtpl:18
 	qw422016.E().S(math.complex(math.pi / 2))
-	//line foo.qtpl:17
+	//line foo.qtpl:18
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:18
+	//line foo.qtpl:19
 	time.StreamNow(qw422016)
-	//line foo.qtpl:18
+	//line foo.qtpl:19
 	qw422016.N().S(`
-	%}
+	`)
+	//line foo.qtpl:23
+	qw422016.N().S(`
+	`)
+	//line foo.qtpl:24
+	qw422016.N().D(fooBar())
+	//line foo.qtpl:24
+	qw422016.N().S(`
+
+	`)
+	//line foo.qtpl:26
+	qw422016.N().S(`
+		Plain on the inside of a func
+		is added to the output
+		Tags are ignored: {% asd %}
+	`)
+	//line foo.qtpl:30
+	qw422016.N().S(`
+
 `)
-//line foo.qtpl:20
+//line foo.qtpl:32
 }
 
-//line foo.qtpl:20
+//line foo.qtpl:32
 func writeabc(qq422016 qtio422016.Writer) {
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	streamabc(qw422016)
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	qt422016.ReleaseWriter(qw422016)
-//line foo.qtpl:20
+//line foo.qtpl:32
 }
 
-//line foo.qtpl:20
+//line foo.qtpl:32
 func abc() string {
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	qb422016 := qt422016.AcquireByteBuffer()
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	writeabc(qb422016)
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	qs422016 := string(qb422016.B)
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	qt422016.ReleaseByteBuffer(qb422016)
-	//line foo.qtpl:20
+	//line foo.qtpl:32
 	return qs422016
-//line foo.qtpl:20
+//line foo.qtpl:32
 }

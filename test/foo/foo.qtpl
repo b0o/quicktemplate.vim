@@ -1,7 +1,8 @@
-{% package foobar %}
+{% package foo %}
 
 {% plain %}
-plain
+plain on the top level becomes
+a go comment
 {% endplain %}
 
 {% interface bar {
@@ -9,12 +10,23 @@ plain
 } %}
 
 {% code
-var a = "foo"
+	var a = "foo"
 %}
 
 {% func abc() %}
 	{% cat "./foo.txt" %}
 	{%s math.complex(math.pi/2) %}
 	{%= time.Now() %}
-	%}
+	{% comment %}
+		comments are not inserted into go
+		code at all
+	{% endcomment %}
+	{%d= fooBar() %}
+
+	{% plain %}
+		Plain on the inside of a func
+		is added to the output
+		Tags are ignored: {% asd %}
+	{% endplain %}
+
 {% endfunc %}
