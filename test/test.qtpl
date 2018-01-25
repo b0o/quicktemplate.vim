@@ -11,19 +11,10 @@ This package contains a test template
 )
 %}
 
-Another comment
-
 {% plain %}
 	This {% will just %} output a string without
 	interpreting the {% tags %}
 {% endplain %}
-
-{% code
-type FooArgs struct {
-	S string `foo:"bar"`
-	N int
-}
-%}
 
 {% func Foo(a map[string]int) %}
 	<div>
@@ -41,4 +32,13 @@ type FooArgs struct {
 	{% endstripspace %}
 	{% cat "test.qtpl" %}
 {% endfunc %}
+
+Another comment
+
+{% code
+type FooArgs struct {
+	S string `foo:"bar"`
+	N int
+}
+%}
 

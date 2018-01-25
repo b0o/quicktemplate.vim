@@ -97,7 +97,6 @@ call s:sb.region('region_outer',
   \ s:pb.make(s:pats.bof),
   \ s:pb.make(s:pats.eof),
 \ )
-  " \ 'contains=CONTAINED'
 
 " Keywords like TODO in the outer region
 call s:sb.match('match_todo',
@@ -110,9 +109,10 @@ call s:sb.match('match_todo',
 call s:sb.region('region_tag',
   \ s:pb.make(s:pats.tagOpen),
   \ s:pb.make(s:pats.tagClose),
-  \ 'keepend',
+  \ 'containedin=' . s:sb.ref('region_outer'),
   \ 'contained',
-  \ 'containedin=' . s:sb.ref('region_outer')
+  \ 'skipwhite',
+  \ 'skipnl',
 \ )
 
 " Opening sequence for qtpl tags
@@ -123,19 +123,11 @@ call s:sb.match('tag_open',
   \ s:pb.make(s:pats.tagOpen),
   \ 'containedin=' . s:sb.ref('region_tag'),
   \ 'nextgroup='   . s:sb.ref('@tag_mods') . ',' . s:sb.ref('@tag_def_keyword'),
+  \ 'contained',
   \ 'skipwhite',
   \ 'skipnl'
 \ )
   " \ 'nextgroup='   . s:sb.ref('tag_mods') . ',' . s:sb.ref('tag_def_keyword'),
-
-" Closing sequence for qtpl tags
-" Ex:
-" {%=uh Foo() %}
-"             ^^
-call s:sb.match('tag_close',
-  \ s:pb.make(s:pats.tagClose),
-  \ 'containedin=' . s:sb.ref('region_tag')
-\ )
 
 " Modifiers which can appear after an
 " opening sequence of an opening qtpl tag
@@ -166,9 +158,10 @@ call s:sb.match('tag_mods_func',
   \ 'skipnl'
 \ )
 
-call s:sb.cluster('tag_mods',
-  \ ['tag_mods_plain', 'tag_mods_func']
-\ )
+call s:sb.cluster('tag_mods', [
+  \ 'tag_mods_plain',
+  \ 'tag_mods_func'
+\ ])
 
 " Any invalid sequence adjacent to an
 " opening qtpl tag sequence
@@ -190,13 +183,107 @@ call s:sb.match('tag_mods_error',
   \ 'containedin=' . s:sb.ref('region_tag')
 \ )
 
-call s:sb.match('tag_def_keyword_block',
+call s:sb.match('tag_def_keyword_block_go',
   \ s:pb.make(
     \ s:pb.agrp(
       \ s:pats.blocks.func
     \ )
   \ ),
-  \ 'nextgroup=' . s:sb.ref('tag_def_block'),
+  \ 'nextgroup=' . s:sb.ref('tag_def_block_go'),
+  \ 'keepend',
+  \ 'contained',
+  \ 'skipwhite',
+  \ 'skipnl'
+\ )
+
+call s:sb.region('tag_def_block_go',
+  \ s:pb.make('.'),
+  \ s:pb.make(
+    \ s:pats.tagClose,
+  \ ) . 'me=e-2',
+  \ 'nextgroup=' . s:sb.ref('tag_close_block_go'),
+  \ 'keepend',
+  \ 'contained',
+  \ 'contains=@qtpl_syn_go',
+  \ 'skipwhite',
+  \ 'skipnl'
+\ )
+
+call s:sb.match('tag_def_keyword_block_plain',
+  \ s:pb.make(
+    \ s:pb.agrp(
+      \ s:pats.blocks.plain
+    \ )
+  \ ),
+  \ 'nextgroup=' . s:sb.ref('tag_def_block_plain'),
+  \ 'keepend',
+  \ 'contained',
+  \ 'skipwhite',
+  \ 'skipnl'
+\ )
+
+call s:sb.region('tag_def_block_plain',
+  \ s:pb.make('.'),
+  \ s:pb.make(
+    \ s:pats.tagClose,
+  \ ) . 'me=e-2',
+  \ 'nextgroup=' . s:sb.ref('tag_close_block_plain'),
+  \ 'keepend',
+  \ 'contained',
+  \ 'skipwhite',
+  \ 'skipnl'
+\ )
+
+" Closing sequence for qtpl tags
+" Ex:
+" {%=uh Foo() %}
+"             ^^
+call s:sb.match('tag_close_inline',
+  \ s:pb.make(s:pats.tagClose),
+  \ 'keepend',
+  \ 'contained',
+  \ 'skipwhite',
+  \ 'skipnl'
+\ )
+
+" Closing sequence for qtpl tags
+" Ex:
+" {%=uh Foo() %}
+"             ^^
+call s:sb.match('tag_close_block_plain',
+  \ s:pb.make(s:pats.tagClose),
+  \ 'nextgroup=' . s:sb.ref('tag_body_block_plain'),
+  \ 'keepend',
+  \ 'contained',
+  \ 'skipwhite',
+  \ 'skipnl'
+\ )
+
+call s:sb.region('tag_body_block_plain',
+  \ s:pb.make('.'),
+  \ s:pb.make(
+    \ s:pats.tagOpen,
+    \ '\_s*',
+    \ s:pats.blockEnd . s:pats.blocks.plain,
+    \ '\_s*',
+    \ s:pats.tagClose
+  \ ) . 'me=s-2',
+  \ 'keepend',
+  \ 'contained',
+  \ 'skipwhite',
+  \ 'skipnl'
+\ )
+    "
+
+
+" Closing sequence for qtpl tags
+" Ex:
+" {%=uh Foo() %}
+"             ^^
+call s:sb.match('tag_close_block_go',
+  \ s:pb.make(s:pats.tagClose),
+  \ 'keepend',
+  \ 'contained',
   \ 'skipwhite',
   \ 'skipnl'
 \ )
@@ -211,29 +298,28 @@ call s:sb.match('tag_def_keyword_inline',
   \ ),
   \ 'nextgroup=' . s:sb.ref('tag_def_inline'),
   \ 'skipwhite',
-  \ 'skipnl'
+  \ 'skipnl',
+  \ 'keepend',
+  \ 'contained',
 \ )
 
 call s:sb.cluster('tag_def_keyword', [
-    \ 'tag_def_keyword_block',
+    \ 'tag_def_keyword_block_go',
+    \ 'tag_def_keyword_block_plain',
     \ 'tag_def_keyword_inline'
   \ ]
 \ )
 
-call s:sb.region('tag_def_block',
-  \ s:pb.make(''),
-  \ s:pb.make(
-    \ s:pats.tagClose,
-  \ ) . 'me=e-2',
-  \ 'keepend',
-  \ 'contained',
-  \ 'contains=@qtpl_syn_go',
-  \ 'skipwhite',
-  \ 'skipnl'
+call s:sb.cluster('tag_close', [
+    \ 'tag_close_block_go',
+    \ 'tag_close_block_plain',
+    \ 'tag_close_inline'
+  \ ]
 \ )
 
+
 call s:sb.region('tag_def_inline',
-  \ s:pb.make(''),
+  \ s:pb.make('.'),
   \ s:pb.make(
     \ s:pats.tagClose,
   \ ) . 'me=e-2',
@@ -241,6 +327,7 @@ call s:sb.region('tag_def_inline',
   \ 'contained',
   \ 'contains=@qtpl_syn_go',
   \ 'skipwhite',
+  \ 'nextgroup=' . s:sb.ref('tag_close_inline'),
   \ 'skipnl'
 \ )
 
@@ -249,20 +336,27 @@ call s:sb.region('tag_def_inline',
 call s:sb.exec()
 
 " TODO: integrate highlight rules into sb
-hi def link qtpl_region_outer           Comment
-hi def link qtpl_match_todo             Underlined
+hi def link qtpl_region_outer                Comment
+hi def link qtpl_match_todo                  Underlined
 
-hi def link qtpl_tag_open               SpecialChar
-hi def link qtpl_tag_close              SpecialChar
+hi def link qtpl_tag_open                    SpecialChar
+hi def link qtpl_tag_close                   SpecialChar
+hi def link qtpl_tag_close_block_go          SpecialChar
+hi def link qtpl_tag_close_block_plain       SpecialChar
+hi def link qtpl_tag_close_inline            SpecialChar
 
-" hi def link qtpl_tag_mods               String
-hi def link qtpl_tag_mods_func          String
-hi def link qtpl_tag_mods_plain         Number
-hi def link qtpl_tag_mods_error         Error
+" hi def link qtpl_tag_mods                  String
+hi def link qtpl_tag_mods_func               String
+hi def link qtpl_tag_mods_plain              Number
+hi def link qtpl_tag_mods_error              Error
 
-" hi def link qtpl_tag_def_keyword        Keyword
-hi def link qtpl_tag_def_keyword_block  Keyword
-hi def link qtpl_tag_def_keyword_inline Keyword
+" hi def link qtpl_tag_def_keyword           Keyword
+hi def link qtpl_tag_def_keyword_block       Keyword
+hi def link qtpl_tag_def_keyword_block_go    Keyword
+hi def link qtpl_tag_def_keyword_block_plain Keyword
+hi def link qtpl_tag_def_keyword_inline      Keyword
+
+hi def link qtpl_tag_body_block_plain        Constant
 
 let b:current_syntax = "qtpl"
 

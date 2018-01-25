@@ -1,12 +1,12 @@
 #!/bin/bash
 
-f=""
+c=""
 w=""
 
-while getopts "f:w:" opt; do
+while getopts "c:w:" opt; do
 	case $opt in
-		f)
-			f="$OPTARG"
+		c)
+			c="$OPTARG"
 			;;
 		w)
 			w="$OPTARG"
@@ -22,5 +22,5 @@ done
 $(dirname $0)/watch.sh -p $$ -w $w &
 
 while : ; do
-  nvim $f
+  eval $c
 done
