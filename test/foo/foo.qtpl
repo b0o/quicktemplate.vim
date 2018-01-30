@@ -10,10 +10,29 @@ a go comment
 } %}
 
 {% code
-	var a = "foo"
+	var a = "foobar"
 %}
 
+{% stripspace %}
+	{% if 1 == 1 %}
+		bar
+	{% endif %}
+{% endstripspace %}
+
 {% func abc() %}
+	{% code
+		var a = "lorem"
+	%}
+
+	{% switch a %}
+		{% case "foo" %}
+			bar
+		{% case "qux" %}
+			lorem
+		{% default %}
+			ipsum
+	{% endswitch %}
+
 	{% cat "./foo.txt" %}
 	{%s math.complex(math.pi/2) %}
 	{%= time.Now() %}
@@ -28,5 +47,4 @@ a go comment
 		is added to the output
 		Tags are ignored: {% asd %}
 	{% endplain %}
-
 {% endfunc %}

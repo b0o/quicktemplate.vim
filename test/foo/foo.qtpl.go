@@ -32,73 +32,109 @@ type bar interface {
 }
 
 //line foo.qtpl:13
-var a = "foo"
+var a = "foobar"
 
-//line foo.qtpl:16
+// 	{% if 1 == 1 %}
+// 		bar
+// 	{% endif %}
+
+//line foo.qtpl:22
 func streamabc(qw422016 *qt422016.Writer) {
-	//line foo.qtpl:16
+	//line foo.qtpl:22
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:17
+	//line foo.qtpl:24
+	var a = "lorem"
+
+	//line foo.qtpl:25
+	qw422016.N().S(`
+
+	`)
+	//line foo.qtpl:27
+	switch a {
+	//line foo.qtpl:28
+	case "foo":
+		//line foo.qtpl:28
+		qw422016.N().S(`
+			bar
+		`)
+	//line foo.qtpl:30
+	case "qux":
+		//line foo.qtpl:30
+		qw422016.N().S(`
+			lorem
+		`)
+	//line foo.qtpl:32
+	default:
+		//line foo.qtpl:32
+		qw422016.N().S(`
+			ipsum
+	`)
+		//line foo.qtpl:34
+	}
+	//line foo.qtpl:34
+	qw422016.N().S(`
+
+	`)
+	//line foo.qtpl:36
 	qw422016.N().S(`Hello World
 `)
-	//line foo.qtpl:17
+	//line foo.qtpl:36
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:18
+	//line foo.qtpl:37
 	qw422016.E().S(math.complex(math.pi / 2))
-	//line foo.qtpl:18
+	//line foo.qtpl:37
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:19
+	//line foo.qtpl:38
 	time.StreamNow(qw422016)
-	//line foo.qtpl:19
+	//line foo.qtpl:38
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:23
+	//line foo.qtpl:42
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:24
+	//line foo.qtpl:43
 	qw422016.N().D(fooBar())
-	//line foo.qtpl:24
+	//line foo.qtpl:43
 	qw422016.N().S(`
 
 	`)
-	//line foo.qtpl:26
+	//line foo.qtpl:45
 	qw422016.N().S(`
 		Plain on the inside of a func
 		is added to the output
 		Tags are ignored: {% asd %}
 	`)
-	//line foo.qtpl:30
+	//line foo.qtpl:49
 	qw422016.N().S(`
-
 `)
-//line foo.qtpl:32
+//line foo.qtpl:50
 }
 
-//line foo.qtpl:32
+//line foo.qtpl:50
 func writeabc(qq422016 qtio422016.Writer) {
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	streamabc(qw422016)
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	qt422016.ReleaseWriter(qw422016)
-//line foo.qtpl:32
+//line foo.qtpl:50
 }
 
-//line foo.qtpl:32
+//line foo.qtpl:50
 func abc() string {
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	qb422016 := qt422016.AcquireByteBuffer()
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	writeabc(qb422016)
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	qs422016 := string(qb422016.B)
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	qt422016.ReleaseByteBuffer(qb422016)
-	//line foo.qtpl:32
+	//line foo.qtpl:50
 	return qs422016
-//line foo.qtpl:32
+//line foo.qtpl:50
 }

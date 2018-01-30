@@ -3,7 +3,13 @@ TODO: This is a todo
 
 This package contains a test template
 
-{%s package templates %}
+{% package templates %}
+
+foo
+
+{% cat "templates" %}
+
+abr
 
 {% import (
 	"fmt"
@@ -11,12 +17,18 @@ This package contains a test template
 )
 %}
 
+{% code type FooArgs struct {
+	S string `foo:"bar"`
+	N int
+}
+%}
+
 {% plain %}
 	This {% will just %} output a string without
 	interpreting the {% tags %}
 {% endplain %}
 
-{% func Foo(a map[string]int) %}
+{% func Foo(a map[string]int) bool %}
 	<div>
 		<h1>{%s title %}
 		My args are:
@@ -34,11 +46,4 @@ This package contains a test template
 {% endfunc %}
 
 Another comment
-
-{% code
-type FooArgs struct {
-	S string `foo:"bar"`
-	N int
-}
-%}
 

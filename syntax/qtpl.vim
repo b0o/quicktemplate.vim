@@ -44,28 +44,6 @@ let s:pats.todo     = s:pb.grp(s:pb.agrp('TODO', 'FIXME', 'XXX', 'BUG', 'NOTE'),
 " tags are singlular quicktemplate directives with no inner
 " container.
 let s:pats.tags           = {}
-let s:pats.tags.code      = 'code'
-let s:pats.tags.package   = 'package'
-let s:pats.tags.import    = 'import'
-let s:pats.tags.cat       = 'cat'
-let s:pats.tags.interface = s:pb.agrp('interface', 'iface')
-let s:pats.tags.case      = 'case'
-let s:pats.tags.default   = 'default'
-let s:pats.tags.newline   = 'newline'
-let s:pats.tags.space     = 'space'
-
-" blocks are pairs of quicktemplate tags (an opening tag and a closing tag)
-" which contain additional code
-let s:pats.blocks               = {}
-let s:pats.blockEnd             = 'end'
-
-let s:pats.blocks.func          = 'func'
-let s:pats.blocks.comment       = 'comment'
-let s:pats.blocks.plain         = 'plain'
-let s:pats.blocks.collapseSpace = 'collapsespace'
-let s:pats.blocks.stripSpace    = 'stripspace'
-let s:pats.blocks.switch        = 'switch'
-let s:pats.blocks.if            = 'if'
 
 " Modifiers for tags which specify output behavior of the tag
 " Similar to printf verbs
@@ -112,27 +90,200 @@ call s:sb.match('tag_open',
   \ 'skipnl',
 \ )
 
-for [k, v] in items(s:pats.blocks)
-  let start_keyword = 'tag_' . v . '_start_keyword'
-  let start_close   = 'tag_' . v . '_start_close'
-  let body          = 'tag_' . v . '_body'
-  let end_open      = 'tag_' . v . '_end_open'
-  let end_keyword   = 'tag_' . v . '_end_keyword'
-  let end_close     = 'tag_' . v . '_end_close'
+" let s:pats.tags.interface = s:pb.agrp('interface', 'iface')
+" let s:pats.tags.case      = 'case'
+" let s:pats.tags.default   = 'default'
+" let s:pats.tags.newline   = 'newline'
+" let s:pats.tags.space     = 'space'
+
+" blocks are pairs of quicktemplate tags (an opening tag and a closing tag)
+" which contain additional code
+let s:pats.blocks = [
+  \ {
+    \ 'name'          : 'func',
+    \ 'contexts'      : ['global'],
+    \ 'type'          : 'block',
+    \ 'start_keyword' : 'func',
+    \ 'end_keyword'   : 'endfunc',
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': '@qtpl_syn_go',
+  \ },
+  \ {
+    \ 'name'          : 'cat',
+    \ 'contexts'      : ['global', 'block'],
+    \ 'type'          : 'inline',
+    \ 'start_keyword' : 'cat',
+    \ 'start_contents_start'   : s:pb.make('\_s\+"'),
+    \ 'start_contents_skip'    : s:pb.make('\\\\\|\\"'),
+    \ 'start_contents_end'     : s:pb.make('"'),
+    \ 'start_contents_contains': '@goStringGroup',
+    \ 'start_contents_hi'      : 'String',
+  \ },
+  \ {
+    \ 'name'          : 'code',
+    \ 'contexts'      : ['global', 'block'],
+    \ 'type'          : 'inline',
+    \ 'start_keyword' : 'code',
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': '@qtpl_syn_go',
+  \ },
+  \ {
+    \ 'name'          : 'package',
+    \ 'contexts'      : ['global'],
+    \ 'type'          : 'inline',
+    \ 'start_keyword' : 'package',
+    \ 'start_contents_start'   : s:pb.make('\S'),
+    \ 'start_contents_end'     : s:pb.make('\_s'),
+    \ 'start_contents_hi'      : 'Identifier',
+  \ },
+  \ {
+    \ 'name'          : 'import',
+    \ 'contexts'      : ['global'],
+    \ 'type'          : 'inline',
+    \ 'start_keyword' : 'import',
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': '@qtpl_syn_go',
+  \ },
+  \ {
+    \ 'name'          : 'comment',
+    \ 'contexts'      : ['global', 'block'],
+    \ 'type'          : 'block',
+    \ 'start_keyword' : 'comment',
+    \ 'end_keyword'   : 'endcomment',
+  \ },
+  \ {
+    \ 'name'          : 'plain',
+    \ 'contexts'      : ['global', 'block'],
+    \ 'type'          : 'block',
+    \ 'start_keyword' : 'plain',
+    \ 'end_keyword'   : 'endplain',
+  \ },
+  \ {
+    \ 'name'          : 'collapsespace',
+    \ 'contexts'      : ['global', 'block'],
+    \ 'type'          : 'block',
+    \ 'start_keyword' : 'collapsespace',
+    \ 'end_keyword'   : 'endcollapsespace',
+  \ },
+  \ {
+    \ 'name'          : 'stripspace',
+    \ 'contexts'      : ['global', 'block'],
+    \ 'type'          : 'block',
+    \ 'start_keyword' : 'stripspace',
+    \ 'end_keyword'   : 'endstripspace',
+  \ },
+  \ {
+    \ 'name'          : 'switch',
+    \ 'contexts'      : ['func'],
+    \ 'type'          : 'block',
+    \ 'start_keyword' : 'switch',
+    \ 'end_keyword'   : 'endswitch',
+  \ },
+  \ {
+    \ 'name'          : 'case',
+    \ 'contexts'      : ['switch'],
+    \ 'type'          : 'inline',
+    \ 'start_keyword' : 'case',
+  \ },
+  \ {
+    \ 'name'          : 'default',
+    \ 'contexts'      : ['switch'],
+    \ 'type'          : 'inline',
+    \ 'start_keyword' : 'default',
+  \ },
+  \ {
+    \ 'name'          : 'if',
+    \ 'contexts'      : ['func'],
+    \ 'type'          : 'block',
+    \ 'start_keyword' : 'if',
+    \ 'end_keyword'   : 'endif',
+  \ },
+  \ {
+    \ 'name'          : 'elseif',
+    \ 'contexts'      : ['if'],
+    \ 'type'          : 'inline',
+    \ 'start_keyword' : 'elseif',
+  \ },
+\ ]
+
+let s:pats.blockEnd             = 'end'
+
+for obj in s:pats.blocks
+  " Predefine group names
+  let prefix         = 'tag_' . obj.name
+  let start_keyword  = prefix . '_start_keyword'
+  let start_contents = prefix . '_start_contents'
+  let start_close    = prefix . '_start_close'
+  let body           = prefix . '_body'
+  let end_open       = prefix . '_end_open'
+  let end_keyword    = prefix . '_end_keyword'
+  let end_close      = prefix . '_end_close'
+
+  let start_keyword_nextgroup = start_close
+
+    " \ 'name'          : 'cat',
+    " \ 'type'          : 'inline',
+    " \ 'start_keyword' : 'cat',
+    " \ 'start_contents_start'   : s:pb.make('"'),
+    " \ 'start_contents_skip'    : s:pb.make('\\\\\|\\"'),
+    " \ 'start_contents_end'     : s:pb.make('"'),
+    " \ 'start_contents_contains': '@goStringGroup',
+    " \ 'start_contents_hi'      : 'String',
+    "
+  if has_key(obj, 'start_contents_start') && has_key(obj, 'start_contents_end')
+    let start_keyword_nextgroup = start_contents
+
+    let start_contents_skip = ''
+    if has_key(obj, 'start_contents_skip')
+      let start_contents_skip = 'skip=' . obj.start_contents_skip
+    endif
+
+    let start_contents_contains = ''
+    if has_key(obj, 'start_contents_contains')
+      let start_contents_contains = 'contains=' . obj.start_contents_contains
+    endif
+
+    " Match the start tag contents, e.g.:
+    " {% func fooBar(a int) bool %}
+    "         ^^^^^^^^^^^^^^^^^^
+    call s:sb.region(start_contents,
+      \ obj.start_contents_start,
+      \ obj.start_contents_end,
+      \ start_contents_skip,
+      \ s:sb.contained(),
+      \ start_contents_contains,
+      \ s:sb.next(start_close),
+      \ 'skipwhite',
+      \ 'keepend',
+      \ 'skipnl',
+    \ )
+
+    if has_key(obj, 'start_contents_hi')
+      call s:sb.hi(start_contents, obj.start_contents_hi)
+    endif
+  endif
 
   " Match the keyword, e.g.:
   " {% plain %}
   "    ^^^^^
   call s:sb.keyword(start_keyword,
-    \ v,
+    \ obj.start_keyword,
     \ s:sb.contained(),
-    \ s:sb.next(start_close),
+    \ s:sb.next(start_keyword_nextgroup),
     \ 'skipwhite',
     \ 'skipnl',
   \ )
   call s:sb.clusteradd('tag_keyword',       [start_keyword])
   call s:sb.clusteradd('tag_start_keyword', [start_keyword])
   call s:sb.hi(start_keyword, 'Keyword')
+
+  let start_close_nextgroup = ''
+  if obj.type == 'block'
+    let start_close_nextgroup = s:sb.next(body)
+  endif
 
   " Match the tag closing sequence, e.g.:
   " {% plain %}
@@ -142,13 +293,17 @@ for [k, v] in items(s:pats.blocks)
   call s:sb.match(start_close,
     \ s:pb.make(s:pats.tagClose),
     \ s:sb.contained(),
-    \ s:sb.next(body),
+    \ start_close_nextgroup,
     \ 'skipwhite',
     \ 'skipnl',
   \ )
   call s:sb.clusteradd('tag_close',       [start_close])
   call s:sb.clusteradd('tag_start_close', [start_close])
   call s:sb.hi(start_close, 'SpecialChar')
+
+  if obj.type != 'block'
+    continue
+  endif
 
   " Match the tag body, e.g.:
   " {% plain %}
@@ -160,7 +315,7 @@ for [k, v] in items(s:pats.blocks)
     \ s:pb.make(
       \ s:pats.tagOpen,
       \ '\_s*',
-      \ s:pats.blockEnd . v,
+      \ obj.end_keyword,
       \ '\_s*',
       \ s:pats.tagClose
     \ ) . 'me=s-2',
@@ -194,7 +349,7 @@ for [k, v] in items(s:pats.blocks)
   " {% endplain %}
   "    ^^^^^^^^
   call s:sb.keyword(end_keyword,
-    \ s:pats.blockEnd . v,
+    \ obj.end_keyword,
     \ s:sb.contained(),
     \ s:sb.next(end_close),
     \ 'skipwhite',
