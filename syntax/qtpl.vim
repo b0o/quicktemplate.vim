@@ -84,55 +84,56 @@ call s:sb.match('match_todo',
 
 call s:sb.match('tag_open',
   \ s:pb.make(s:pats.tagOpen),
-  \ s:sb.contained('global'),
+  \ s:sb.contained('global', '@block'),
   \ s:sb.next('@tag_keyword'),
   \ 'skipwhite',
   \ 'skipnl',
 \ )
 
 " let s:pats.tags.interface = s:pb.agrp('interface', 'iface')
-" let s:pats.tags.case      = 'case'
-" let s:pats.tags.default   = 'default'
 " let s:pats.tags.newline   = 'newline'
 " let s:pats.tags.space     = 'space'
 
+" \ ]
+" let s:pats.xblocks = [
 " blocks are pairs of quicktemplate tags (an opening tag and a closing tag)
 " which contain additional code
 let s:pats.blocks = [
   \ {
     \ 'name'          : 'func',
-    \ 'contexts'      : ['global'],
-    \ 'type'          : 'block',
+    \ 'containedin'   : ['global'],
+    \ 'clusters'      : ['block', 'func'],
     \ 'start_keyword' : 'func',
     \ 'end_keyword'   : 'endfunc',
+    \ 'contains'      : ['@syn_html'],
     \ 'start_contents_start'   : s:pb.make('.'),
     \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
-    \ 'start_contents_contains': '@qtpl_syn_go',
+    \ 'start_contents_contains': ['@syn_go'],
   \ },
   \ {
     \ 'name'          : 'cat',
-    \ 'contexts'      : ['global', 'block'],
-    \ 'type'          : 'inline',
+    \ 'containedin'   : ['global', '@block'],
+    \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'cat',
-    \ 'start_contents_start'   : s:pb.make('\_s\+"'),
+    \ 'start_contents_start'   : s:pb.make('"'),
     \ 'start_contents_skip'    : s:pb.make('\\\\\|\\"'),
     \ 'start_contents_end'     : s:pb.make('"'),
-    \ 'start_contents_contains': '@goStringGroup',
+    \ 'start_contents_contains': ['!@goStringGroup'],
     \ 'start_contents_hi'      : 'String',
   \ },
   \ {
     \ 'name'          : 'code',
-    \ 'contexts'      : ['global', 'block'],
-    \ 'type'          : 'inline',
+    \ 'containedin'   : ['global', '@block'],
+    \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'code',
     \ 'start_contents_start'   : s:pb.make('.'),
     \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
-    \ 'start_contents_contains': '@qtpl_syn_go',
+    \ 'start_contents_contains': ['@syn_go'],
   \ },
   \ {
     \ 'name'          : 'package',
-    \ 'contexts'      : ['global'],
-    \ 'type'          : 'inline',
+    \ 'containedin'   : ['global'],
+    \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'package',
     \ 'start_contents_start'   : s:pb.make('\S'),
     \ 'start_contents_end'     : s:pb.make('\_s'),
@@ -140,72 +141,104 @@ let s:pats.blocks = [
   \ },
   \ {
     \ 'name'          : 'import',
-    \ 'contexts'      : ['global'],
-    \ 'type'          : 'inline',
+    \ 'containedin'   : ['global'],
+    \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'import',
     \ 'start_contents_start'   : s:pb.make('.'),
     \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
-    \ 'start_contents_contains': '@qtpl_syn_go',
+    \ 'start_contents_contains': ['@syn_go'],
   \ },
   \ {
     \ 'name'          : 'comment',
-    \ 'contexts'      : ['global', 'block'],
-    \ 'type'          : 'block',
+    \ 'containedin'   : ['global', '@block'],
+    \ 'clusters'      : ['blockcomment'],
     \ 'start_keyword' : 'comment',
     \ 'end_keyword'   : 'endcomment',
+    \ 'hi'            : 'Comment',
   \ },
   \ {
     \ 'name'          : 'plain',
-    \ 'contexts'      : ['global', 'block'],
-    \ 'type'          : 'block',
+    \ 'containedin'   : ['global', '@block'],
+    \ 'clusters'      : ['blockcomment'],
     \ 'start_keyword' : 'plain',
     \ 'end_keyword'   : 'endplain',
+    \ 'hi'            : 'Comment',
   \ },
   \ {
     \ 'name'          : 'collapsespace',
-    \ 'contexts'      : ['global', 'block'],
-    \ 'type'          : 'block',
+    \ 'containedin'   : ['global', '@block'],
+    \ 'clusters'      : ['block'],
     \ 'start_keyword' : 'collapsespace',
     \ 'end_keyword'   : 'endcollapsespace',
   \ },
   \ {
     \ 'name'          : 'stripspace',
-    \ 'contexts'      : ['global', 'block'],
-    \ 'type'          : 'block',
+    \ 'containedin'   : ['global', '@block'],
+    \ 'clusters'      : ['block'],
     \ 'start_keyword' : 'stripspace',
     \ 'end_keyword'   : 'endstripspace',
   \ },
   \ {
+    \ 'name'          : 'space',
+    \ 'containedin'   : ['@block'],
+    \ 'clusters'      : ['inline'],
+    \ 'start_keyword' : 'space',
+  \ },
+  \ {
+    \ 'name'          : 'newline',
+    \ 'containedin'   : ['@block'],
+    \ 'clusters'      : ['inline'],
+    \ 'start_keyword' : 'newline',
+  \ },
+  \ {
     \ 'name'          : 'switch',
-    \ 'contexts'      : ['func'],
-    \ 'type'          : 'block',
+    \ 'containedin'   : ['@func'],
+    \ 'clusters'      : ['block', 'switch'],
     \ 'start_keyword' : 'switch',
     \ 'end_keyword'   : 'endswitch',
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': ['@syn_go'],
   \ },
   \ {
     \ 'name'          : 'case',
-    \ 'contexts'      : ['switch'],
-    \ 'type'          : 'inline',
+    \ 'containedin'   : ['@switch'],
+    \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'case',
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': ['@syn_go'],
   \ },
   \ {
     \ 'name'          : 'default',
-    \ 'contexts'      : ['switch'],
-    \ 'type'          : 'inline',
+    \ 'containedin'   : ['@switch'],
+    \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'default',
   \ },
   \ {
     \ 'name'          : 'if',
-    \ 'contexts'      : ['func'],
-    \ 'type'          : 'block',
+    \ 'containedin'   : ['@func'],
+    \ 'clusters'      : ['block', 'if'],
     \ 'start_keyword' : 'if',
     \ 'end_keyword'   : 'endif',
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': ['@syn_go'],
+  \ },
+  \ {
+    \ 'name'          : 'else',
+    \ 'containedin'   : ['@if'],
+    \ 'clusters'      : ['inline'],
+    \ 'start_keyword' : 'else',
   \ },
   \ {
     \ 'name'          : 'elseif',
-    \ 'contexts'      : ['if'],
-    \ 'type'          : 'inline',
+    \ 'containedin'   : ['@if'],
+    \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'elseif',
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': ['@syn_go'],
   \ },
 \ ]
 
@@ -224,15 +257,6 @@ for obj in s:pats.blocks
 
   let start_keyword_nextgroup = start_close
 
-    " \ 'name'          : 'cat',
-    " \ 'type'          : 'inline',
-    " \ 'start_keyword' : 'cat',
-    " \ 'start_contents_start'   : s:pb.make('"'),
-    " \ 'start_contents_skip'    : s:pb.make('\\\\\|\\"'),
-    " \ 'start_contents_end'     : s:pb.make('"'),
-    " \ 'start_contents_contains': '@goStringGroup',
-    " \ 'start_contents_hi'      : 'String',
-    "
   if has_key(obj, 'start_contents_start') && has_key(obj, 'start_contents_end')
     let start_keyword_nextgroup = start_contents
 
@@ -243,9 +267,11 @@ for obj in s:pats.blocks
 
     let start_contents_contains = ''
     if has_key(obj, 'start_contents_contains')
-      let start_contents_contains = 'contains=' . obj.start_contents_contains
+      let start_contents_contains = s:sb.lcontains(obj.start_contents_contains)
     endif
 
+      " \ s:sb.contained(),
+      " \ s:sb.lcontained(obj.containedin),
     " Match the start tag contents, e.g.:
     " {% func fooBar(a int) bool %}
     "         ^^^^^^^^^^^^^^^^^^
@@ -269,10 +295,11 @@ for obj in s:pats.blocks
   " Match the keyword, e.g.:
   " {% plain %}
   "    ^^^^^
-  call s:sb.keyword(start_keyword,
-    \ obj.start_keyword,
-    \ s:sb.contained(),
+    " \ s:pb.make(s:pb.pla(s:pb.grp(s:pats.tagOpen . '\_s\+')), obj.start_keyword),
+  call s:sb.match(start_keyword,
+    \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen . '\_s*')), obj.start_keyword, '\_s*'),
     \ s:sb.next(start_keyword_nextgroup),
+    \ s:sb.lcontained(obj.containedin),
     \ 'skipwhite',
     \ 'skipnl',
   \ )
@@ -281,7 +308,7 @@ for obj in s:pats.blocks
   call s:sb.hi(start_keyword, 'Keyword')
 
   let start_close_nextgroup = ''
-  if obj.type == 'block'
+  if index(obj.clusters, 'block') != -1 || index(obj.clusters, 'blockcomment') != -1
     let start_close_nextgroup = s:sb.next(body)
   endif
 
@@ -301,10 +328,14 @@ for obj in s:pats.blocks
   call s:sb.clusteradd('tag_start_close', [start_close])
   call s:sb.hi(start_close, 'SpecialChar')
 
-  if obj.type != 'block'
+  if index(obj.clusters, 'block') == -1 && index(obj.clusters, 'blockcomment') == -1
     continue
   endif
 
+  let body_contains = ''
+  if has_key(obj, 'contains')
+    let body_contains = s:sb.lcontains(obj.contains)
+  endif
   " Match the tag body, e.g.:
   " {% plain %}
   "   this is inside the plain tag...
@@ -321,11 +352,19 @@ for obj in s:pats.blocks
     \ ) . 'me=s-2',
     \ s:sb.contained(),
     \ s:sb.next(end_open),
+    \ body_contains,
     \ 'skipwhite',
     \ 'skipnl',
   \ )
   call s:sb.clusteradd('tag_body', [body])
-  call s:sb.hi(body, 'String') " TODO
+  if has_key(obj, 'clusters')
+    for c in obj.clusters
+      call s:sb.clusteradd(c, [body])
+    endfor
+  endif
+  if has_key(obj, 'hi')
+    call s:sb.hi(body, obj.hi)
+  endif
 
   " Match the end tag opening sequence, e.g.:
   " {% plain %}

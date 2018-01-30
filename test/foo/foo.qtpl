@@ -14,15 +14,17 @@ a go comment
 %}
 
 {% stripspace %}
-	{% if 1 == 1 %}
-		bar
-	{% endif %}
+	asd
 {% endstripspace %}
 
 {% func abc() %}
 	{% code
 		var a = "lorem"
 	%}
+
+	{% if 1 == 1 %}
+		bar
+	{% endif %}
 
 	{% switch a %}
 		{% case "foo" %}

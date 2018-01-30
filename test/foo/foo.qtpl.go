@@ -34,107 +34,117 @@ type bar interface {
 //line foo.qtpl:13
 var a = "foobar"
 
-// 	{% if 1 == 1 %}
-// 		bar
-// 	{% endif %}
+// asd
 
-//line foo.qtpl:22
+//line foo.qtpl:20
 func streamabc(qw422016 *qt422016.Writer) {
-	//line foo.qtpl:22
+	//line foo.qtpl:20
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:24
+	//line foo.qtpl:22
 	var a = "lorem"
 
-	//line foo.qtpl:25
+	//line foo.qtpl:23
 	qw422016.N().S(`
 
 	`)
+	//line foo.qtpl:25
+	if 1 == 1 {
+		//line foo.qtpl:25
+		qw422016.N().S(`
+		bar
+	`)
+		//line foo.qtpl:27
+	}
 	//line foo.qtpl:27
+	qw422016.N().S(`
+
+	`)
+	//line foo.qtpl:29
 	switch a {
-	//line foo.qtpl:28
+	//line foo.qtpl:30
 	case "foo":
-		//line foo.qtpl:28
+		//line foo.qtpl:30
 		qw422016.N().S(`
 			bar
 		`)
-	//line foo.qtpl:30
+	//line foo.qtpl:32
 	case "qux":
-		//line foo.qtpl:30
+		//line foo.qtpl:32
 		qw422016.N().S(`
 			lorem
 		`)
-	//line foo.qtpl:32
+	//line foo.qtpl:34
 	default:
-		//line foo.qtpl:32
+		//line foo.qtpl:34
 		qw422016.N().S(`
 			ipsum
 	`)
-		//line foo.qtpl:34
+		//line foo.qtpl:36
 	}
-	//line foo.qtpl:34
+	//line foo.qtpl:36
 	qw422016.N().S(`
 
 	`)
-	//line foo.qtpl:36
+	//line foo.qtpl:38
 	qw422016.N().S(`Hello World
 `)
-	//line foo.qtpl:36
+	//line foo.qtpl:38
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:37
+	//line foo.qtpl:39
 	qw422016.E().S(math.complex(math.pi / 2))
-	//line foo.qtpl:37
+	//line foo.qtpl:39
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:38
+	//line foo.qtpl:40
 	time.StreamNow(qw422016)
-	//line foo.qtpl:38
+	//line foo.qtpl:40
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:42
+	//line foo.qtpl:44
 	qw422016.N().S(`
 	`)
-	//line foo.qtpl:43
+	//line foo.qtpl:45
 	qw422016.N().D(fooBar())
-	//line foo.qtpl:43
+	//line foo.qtpl:45
 	qw422016.N().S(`
 
 	`)
-	//line foo.qtpl:45
+	//line foo.qtpl:47
 	qw422016.N().S(`
 		Plain on the inside of a func
 		is added to the output
 		Tags are ignored: {% asd %}
 	`)
-	//line foo.qtpl:49
+	//line foo.qtpl:51
 	qw422016.N().S(`
 `)
-//line foo.qtpl:50
+//line foo.qtpl:52
 }
 
-//line foo.qtpl:50
+//line foo.qtpl:52
 func writeabc(qq422016 qtio422016.Writer) {
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	streamabc(qw422016)
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	qt422016.ReleaseWriter(qw422016)
-//line foo.qtpl:50
+//line foo.qtpl:52
 }
 
-//line foo.qtpl:50
+//line foo.qtpl:52
 func abc() string {
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	qb422016 := qt422016.AcquireByteBuffer()
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	writeabc(qb422016)
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	qs422016 := string(qb422016.B)
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	qt422016.ReleaseByteBuffer(qb422016)
-	//line foo.qtpl:50
+	//line foo.qtpl:52
 	return qs422016
-//line foo.qtpl:50
+//line foo.qtpl:52
 }

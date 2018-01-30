@@ -23,19 +23,30 @@ abr
 }
 %}
 
-{% plain %}
+{% comment %}
 	This {% will just %} output a string without
 	interpreting the {% tags %}
-{% endplain %}
+{% endcomment %}
+
+asd
 
 {% func Foo(a map[string]int) bool %}
 	<div>
-		<h1>{%s title %}
+		{% comment %}
+			This is a {% comment %}
+		{% endcomment %}
+		<h1> {%s title %} </h1>
+		<script>
+			var a = {%s foo %};
+			console.log(a)
+		</script>
 		My args are:
 		{% if len(a) == 0 %}
 			no args!
 		{% elseif len(a) == 1 %}
 			a single arg: {%= printArgs(0, &a[0]) %}
+		{% else %}
+			multuple args
 		{% endif %}
 	</div>
 	{% stripspace %}
