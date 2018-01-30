@@ -29,7 +29,6 @@ call dein#add('b0o/quicktemplate.vim', {'depends': 'b0o/builder.vim'})
 If you know how to fix any of these issues, please submit a PR!
 
   * [ ] Certain template blocks within HTML blocks are not highlighted
-  * [ ] Function declarations do not receive Go syntax highlighting
 
 ### License
 
