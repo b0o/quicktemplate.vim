@@ -1,1 +1,1 @@
-let g:quicktemplate#version = '0.1.0'
+let g:quicktemplate#version = '0.2.0'

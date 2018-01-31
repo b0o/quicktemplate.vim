@@ -1,5 +1,7 @@
 " qtpl.vim: Vim syntax file for Quicktemplate syntax
 
+""" SETUP
+
 " Quit when a (custom) syntax file was already loaded
 if exists("b:current_syntax")
   finish
@@ -68,6 +70,82 @@ let s:pats.funcTagMods =
   \ s:pb.opt('h')
 \ )
 
+""" EXTERNAL CLUSTERS
+" Define a cluster `html_container` which collects all possible
+" regions defined within syntax/html.vim and its children
+
+" syntax/html.vim
+call s:sb.clusteradd('html_container', [
+  \ '!cssStyle',
+  \ '!htmlBold',
+  \ '!htmlBoldItalic',
+  \ '!htmlBoldItalicUnderline',
+  \ '!htmlBoldUnderline',
+  \ '!htmlBoldUnderlineItalic',
+  \ '!htmlComment',
+  \ '!htmlCommentPart',
+  \ '!htmlCssDefinition',
+  \ '!htmlEndTag',
+  \ '!htmlEvent',
+  \ '!htmlEventDQ',
+  \ '!htmlEventSQ',
+  \ '!htmlH1',
+  \ '!htmlH2',
+  \ '!htmlH3',
+  \ '!htmlH4',
+  \ '!htmlH5',
+  \ '!htmlH6',
+  \ '!htmlHead',
+  \ '!htmlItalic',
+  \ '!htmlItalicBold',
+  \ '!htmlItalicBoldUnderline',
+  \ '!htmlItalicUnderline',
+  \ '!htmlItalicUnderlineBold',
+  \ '!htmlLink',
+  \ '!htmlPreAttr',
+  \ '!htmlPreProc',
+  \ '!htmlScriptTag',
+  \ '!htmlStrike',
+  \ '!htmlString',
+  \ '!htmlTag',
+  \ '!htmlTitle',
+  \ '!htmlUnderline',
+  \ '!htmlUnderlineBold',
+  \ '!htmlUnderlineBoldItalic',
+  \ '!htmlUnderlineItalic',
+  \ '!htmlUnderlineItalicBold',
+  \ '!javaScript',
+  \ '!javaScriptExpression',
+\ ])
+
+" syntax/javascript.vim
+call s:sb.clusteradd('html_container', [
+  \ '!javaScriptComment',
+  \ '!javaScriptFunctionFold',
+  \ '!javaScriptRegexpString',
+  \ '!javaScriptStringD',
+  \ '!javaScriptStringS',
+\ ])
+
+" syntax/css.vim
+call s:sb.clusteradd('html_container', [
+  \ '!cssAttrRegion',
+  \ '!cssAttributeSelector',
+  \ '!cssComment',
+  \ '!cssDefinition',
+  \ '!cssFontDescriptorBlock',
+  \ '!cssFontDescriptorFunction',
+  \ '!cssFunction',
+  \ '!cssInclude',
+  \ '!cssKeyFrameWrap',
+  \ '!cssMediaBlock',
+  \ '!cssPageWrap',
+  \ '!cssPseudoClassFn',
+  \ '!cssStringQ',
+  \ '!cssStringQQ',
+  \ '!cssURL',
+\ ])
+
 """ SYNTAX
 
 " Everything in the outermost scope is considered a comment
@@ -75,24 +153,106 @@ call s:sb.region('global',
   \ s:pb.make(s:pats.bof),
   \ s:pb.make(s:pats.eof),
 \ )
+call s:sb.hi('global', 'Comment')
 
 " Keywords like TODO in the outer region
-call s:sb.match('match_todo',
+call s:sb.match('todo',
   \ s:pb.make(s:pats.todo),
   \ s:sb.contained('global'),
 \ )
+call s:sb.hi('todo', 'TODO')
 
-call s:sb.match('tag_open',
+" Opening qtpl tags found within the global scope
+call s:sb.match('global_tag_open',
   \ s:pb.make(s:pats.tagOpen),
-  \ s:sb.contained('global', '@block'),
-  \ s:sb.next('@tag_keyword'),
+  \ s:sb.contained('global'),
   \ 'skipwhite',
-  \ 'skipnl',
+  \ 'skipempty',
+\ )
+call s:sb.hi('global_tag_open', 'SpecialChar')
+
+" Opening qtpl tags found within a block-level scope
+call s:sb.match('block_tag_open',
+  \ s:pb.make(s:pats.tagOpen),
+  \ s:sb.contained('@block', '@html_container'),
+  \ s:sb.next('@tag_mods'),
+  \ 'skipwhite',
+  \ 'skipempty',
+\ )
+call s:sb.hi('block_tag_open', 'SpecialChar')
+
+call s:sb.cluster('tag_open', [
+  \ 'global_tag_open',
+  \ 'block_tag_open'
+\ ])
+
+" Modifiers which can appear after an
+" opening sequence of a starting qtpl tag
+" denoting a value placeholder
+" Ex:
+" {%s= mystr %}
+"   ^^
+call s:sb.match('tag_ph_value_mods',
+  \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.plainTagMods, s:pb.pla('\_s')),
+  \ s:sb.contained(),
+  \ s:sb.next('tag_ph_value_contents'),
+  \ 'skipwhite',
+  \ 'skipempty',
+\ )
+call s:sb.hi('tag_ph_value_mods', 'Function')
+
+" Modifiers which can appear after an
+" opening sequence of a starting qtpl tag
+" denoting a function call placeholder
+" Ex:
+" {%=uh myFunc() %}
+"   ^^^
+call s:sb.match('tag_ph_func_mods',
+  \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.funcTagMods, s:pb.pla('\_s')),
+  \ s:sb.contained(),
+  \ s:sb.next('tag_ph_func_contents'),
+  \ 'skipwhite',
+  \ 'skipempty',
+\ )
+call s:sb.hi('tag_ph_func_mods', 'Function')
+
+call s:sb.cluster('tag_mods', [
+  \ 'tag_ph_value_mods',
+  \ 'tag_ph_func_mods'
+\ ])
+
+call s:sb.region('tag_ph_value_contents',
+  \ s:pb.make('.'),
+  \ s:pb.make(s:pats.tagClose) . 'me=s-2',
+  \ s:sb.contained(),
+  \ s:sb.contains('@syn_go'),
+  \ s:sb.next('tag_ph_close'),
+  \ 'skipwhite',
+  \ 'skipempty',
+  \ 'keepend',
 \ )
 
-" let s:pats.tags.interface = s:pb.agrp('interface', 'iface')
-" let s:pats.tags.newline   = 'newline'
-" let s:pats.tags.space     = 'space'
+call s:sb.region('tag_ph_func_contents',
+  \ s:pb.make('.'),
+  \ s:pb.make(s:pats.tagClose) . 'me=s-2',
+  \ s:sb.contained(),
+  \ s:sb.contains('@syn_go'),
+  \ s:sb.next('tag_ph_close'),
+  \ 'skipwhite',
+  \ 'skipempty',
+  \ 'keepend',
+\ )
+
+call s:sb.match('tag_ph_close',
+  \ s:pb.make(s:pats.tagClose),
+  \ s:sb.contained(),
+  \ 'skipwhite',
+  \ 'skipempty',
+\ )
+call s:sb.clusteradd('tag_close',       ['tag_ph_close'])
+call s:sb.clusteradd('tag_start_close', ['tag_ph_close'])
+call s:sb.hi('tag_ph_close', 'SpecialChar')
+
 
 " \ ]
 " let s:pats.xblocks = [
@@ -120,6 +280,15 @@ let s:pats.blocks = [
     \ 'start_contents_end'     : s:pb.make('"'),
     \ 'start_contents_contains': ['!@goStringGroup'],
     \ 'start_contents_hi'      : 'String',
+  \ },
+  \ {
+    \ 'name'          : 'interface',
+    \ 'containedin'   : ['global'],
+    \ 'clusters'      : ['inline'],
+    \ 'start_keyword' : s:pb.agrp('iface', 'interface'),
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': ['@syn_go'],
   \ },
   \ {
     \ 'name'          : 'code',
@@ -157,12 +326,20 @@ let s:pats.blocks = [
     \ 'hi'            : 'Comment',
   \ },
   \ {
-    \ 'name'          : 'plain',
-    \ 'containedin'   : ['global', '@block'],
+    \ 'name'          : 'plain_global',
+    \ 'containedin'   : ['global'],
     \ 'clusters'      : ['blockcomment'],
     \ 'start_keyword' : 'plain',
     \ 'end_keyword'   : 'endplain',
     \ 'hi'            : 'Comment',
+  \ },
+  \ {
+    \ 'name'          : 'plain_block',
+    \ 'containedin'   : ['@block'],
+    \ 'clusters'      : ['blockcomment'],
+    \ 'start_keyword' : 'plain',
+    \ 'end_keyword'   : 'endplain',
+    \ 'contains'      : ['@syn_html'],
   \ },
   \ {
     \ 'name'          : 'collapsespace',
@@ -170,6 +347,7 @@ let s:pats.blocks = [
     \ 'clusters'      : ['block'],
     \ 'start_keyword' : 'collapsespace',
     \ 'end_keyword'   : 'endcollapsespace',
+    \ 'body_args'     : ['transparent'],
   \ },
   \ {
     \ 'name'          : 'stripspace',
@@ -177,6 +355,7 @@ let s:pats.blocks = [
     \ 'clusters'      : ['block'],
     \ 'start_keyword' : 'stripspace',
     \ 'end_keyword'   : 'endstripspace',
+    \ 'body_args'     : ['transparent'],
   \ },
   \ {
     \ 'name'          : 'space',
@@ -192,10 +371,11 @@ let s:pats.blocks = [
   \ },
   \ {
     \ 'name'          : 'switch',
-    \ 'containedin'   : ['@func'],
+    \ 'containedin'   : ['@func', '@for', '@if', '@switch'],
     \ 'clusters'      : ['block', 'switch'],
     \ 'start_keyword' : 'switch',
     \ 'end_keyword'   : 'endswitch',
+    \ 'contains'      : ['@syn_html'],
     \ 'start_contents_start'   : s:pb.make('.'),
     \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
     \ 'start_contents_contains': ['@syn_go'],
@@ -216,11 +396,23 @@ let s:pats.blocks = [
     \ 'start_keyword' : 'default',
   \ },
   \ {
+    \ 'name'          : 'for',
+    \ 'containedin'   : ['@func', '@for', '@if', '@switch'],
+    \ 'clusters'      : ['block', 'for'],
+    \ 'start_keyword' : 'for',
+    \ 'end_keyword'   : 'endfor',
+    \ 'contains'      : ['@syn_html'],
+    \ 'start_contents_start'   : s:pb.make('.'),
+    \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
+    \ 'start_contents_contains': ['@syn_go'],
+  \ },
+  \ {
     \ 'name'          : 'if',
-    \ 'containedin'   : ['@func'],
+    \ 'containedin'   : ['@func', '@for', '@if', '@switch'],
     \ 'clusters'      : ['block', 'if'],
     \ 'start_keyword' : 'if',
     \ 'end_keyword'   : 'endif',
+    \ 'contains'      : ['@syn_html'],
     \ 'start_contents_start'   : s:pb.make('.'),
     \ 'start_contents_end'     : s:pb.make(s:pats.tagClose) . 'me=s-2',
     \ 'start_contents_contains': ['@syn_go'],
@@ -270,8 +462,6 @@ for obj in s:pats.blocks
       let start_contents_contains = s:sb.lcontains(obj.start_contents_contains)
     endif
 
-      " \ s:sb.contained(),
-      " \ s:sb.lcontained(obj.containedin),
     " Match the start tag contents, e.g.:
     " {% func fooBar(a int) bool %}
     "         ^^^^^^^^^^^^^^^^^^
@@ -283,8 +473,8 @@ for obj in s:pats.blocks
       \ start_contents_contains,
       \ s:sb.next(start_close),
       \ 'skipwhite',
+      \ 'skipempty',
       \ 'keepend',
-      \ 'skipnl',
     \ )
 
     if has_key(obj, 'start_contents_hi')
@@ -295,13 +485,12 @@ for obj in s:pats.blocks
   " Match the keyword, e.g.:
   " {% plain %}
   "    ^^^^^
-    " \ s:pb.make(s:pb.pla(s:pb.grp(s:pats.tagOpen . '\_s\+')), obj.start_keyword),
   call s:sb.match(start_keyword,
-    \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen . '\_s*')), obj.start_keyword, '\_s*'),
+    \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen . '\_s*')), obj.start_keyword, s:pb.pla('\W'), '\_s*'),
     \ s:sb.next(start_keyword_nextgroup),
     \ s:sb.lcontained(obj.containedin),
     \ 'skipwhite',
-    \ 'skipnl',
+    \ 'skipempty',
   \ )
   call s:sb.clusteradd('tag_keyword',       [start_keyword])
   call s:sb.clusteradd('tag_start_keyword', [start_keyword])
@@ -322,7 +511,7 @@ for obj in s:pats.blocks
     \ s:sb.contained(),
     \ start_close_nextgroup,
     \ 'skipwhite',
-    \ 'skipnl',
+    \ 'skipempty',
   \ )
   call s:sb.clusteradd('tag_close',       [start_close])
   call s:sb.clusteradd('tag_start_close', [start_close])
@@ -336,6 +525,13 @@ for obj in s:pats.blocks
   if has_key(obj, 'contains')
     let body_contains = s:sb.lcontains(obj.contains)
   endif
+
+  let body_args = ''
+  if has_key(obj, 'body_args')
+    let body_args = join(obj.body_args, ' ')
+  endif
+
+
   " Match the tag body, e.g.:
   " {% plain %}
   "   this is inside the plain tag...
@@ -354,7 +550,8 @@ for obj in s:pats.blocks
     \ s:sb.next(end_open),
     \ body_contains,
     \ 'skipwhite',
-    \ 'skipnl',
+    \ 'skipempty',
+    \ body_args,
   \ )
   call s:sb.clusteradd('tag_body', [body])
   if has_key(obj, 'clusters')
@@ -376,7 +573,7 @@ for obj in s:pats.blocks
     \ s:sb.contained(),
     \ s:sb.next(end_keyword),
     \ 'skipwhite',
-    \ 'skipnl',
+    \ 'skipempty',
   \ )
   call s:sb.clusteradd('tag_open',       [end_open])
   call s:sb.clusteradd('tag_end_open',   [end_open])
@@ -392,7 +589,7 @@ for obj in s:pats.blocks
     \ s:sb.contained(),
     \ s:sb.next(end_close),
     \ 'skipwhite',
-    \ 'skipnl',
+    \ 'skipempty',
   \ )
   call s:sb.clusteradd('tag_keyword',     [end_keyword])
   call s:sb.clusteradd('tag_end_keyword', [end_keyword])
@@ -412,269 +609,7 @@ for obj in s:pats.blocks
   call s:sb.hi(end_close, 'SpecialChar')
 endfor
 
-let g:sb = s:sb
-let g:pb = s:pb
-
-" " Contents of a qtpl tag
-" call s:sb.region('region_tag',
-"   \ s:pb.make(s:pats.tagOpen),
-"   \ s:pb.make(s:pats.tagClose),
-"   \ 'containedin=' . s:sb.ref('global'),
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl',
-" \ )
-"
-" " Opening sequence for qtpl tags
-" " Ex:
-" " {%=uh Foo() %}
-" " ^^
-" call s:sb.match('tag_open',
-"   \ s:pb.make(s:pats.tagOpen),
-"   \ 'containedin=' . s:sb.ref('region_tag'),
-"   \ 'nextgroup='   . s:sb.ref('@tag_mods') . ',' . s:sb.ref('@tag_def_keyword'),
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"   " \ 'nextgroup='   . s:sb.ref('tag_mods') . ',' . s:sb.ref('tag_def_keyword'),
-"
-" " Modifiers which can appear after an
-" " opening sequence of an opening qtpl tag
-" " of the plain catagory (TODO: Reword this)
-" " Closing sequence for qtpl tags
-" " Ex:
-" " {%s= mystr %}
-" "   ^^
-" call s:sb.match('tag_mods_plain',
-"   \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.plainTagMods, s:pb.pla('\_s')),
-"   \ 'containedin=' . s:sb.ref('region_tag'),
-"   \ 'nextgroup=' . s:sb.ref('@tag_def_keyword'),
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" " Modifiers which can appear after an
-" " opening sequence of an opening qtpl
-" " function call tag
-" " Ex:
-" " {%=uh myFunc() %}
-" "   ^^^
-" call s:sb.match('tag_mods_func',
-"   \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen)), s:pats.funcTagMods, s:pb.pla('\_s')),
-"   \ 'containedin=' . s:sb.ref('region_tag'),
-"   \ 'nextgroup=' . s:sb.ref('@tag_def_keyword'),
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" call s:sb.cluster('tag_mods', [
-"   \ 'tag_mods_plain',
-"   \ 'tag_mods_func'
-" \ ])
-"
-" " Any invalid sequence adjacent to an
-" " opening qtpl tag sequence
-" " Ex:
-" " {%nope myFunc() %}
-" "   ^^^^
-" " TODO: shouldn't match in cases where a valid
-" " tag keyword is directly adjacent to its opening
-" " tag sequence in certain cases
-" " Ex: (should not match)
-" " {%space%}
-" call s:sb.match('tag_mods_error',
-"   \ s:pb.make(
-"     \ s:pb.plb(s:pb.grp(s:pats.tagOpen)),
-"     \ s:pb.nla(s:pb.grp(s:pb.agrp(s:pats.plainTagMods, s:pats.funcTagMods), '\_s')),
-"     \ '\S\+',
-"     \ s:pb.pla('\_s')
-"   \ ),
-"   \ 'containedin=' . s:sb.ref('region_tag')
-" \ )
-"
-" call s:sb.match('tag_def_block_keyword_go',
-"   \ s:pb.make(
-"     \ s:pb.agrp(
-"       \ s:pats.blocks.func
-"     \ )
-"   \ ),
-"   \ 'nextgroup=' . s:sb.ref('tag_def_block_go'),
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" call s:sb.region('tag_def_block_go',
-"   \ s:pb.make('.'),
-"   \ s:pb.make(
-"     \ s:pats.tagClose,
-"   \ ) . 'me=e-2',
-"   \ 'nextgroup=' . s:sb.ref('tag_def_close_block_go'),
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'contains=@qtpl_syn_go',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" call s:sb.match('tag_def_block_keyword_plain',
-"   \ s:pb.make(
-"     \ s:pb.agrp(
-"       \ s:pats.blocks.plain
-"     \ )
-"   \ ),
-"   \ 'nextgroup=' . s:sb.ref('tag_def_block_plain'),
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" call s:sb.region('tag_def_block_plain',
-"   \ s:pb.make('.'),
-"   \ s:pb.make(
-"     \ s:pats.tagClose,
-"   \ ) . 'me=e-2',
-"   \ 'nextgroup=' . s:sb.ref('tag_def_close_block_plain'),
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" " Closing sequence for qtpl tags
-" " Ex:
-" " {%=uh Foo() %}
-" "             ^^
-" call s:sb.match('tag_close_inline',
-"   \ s:pb.make(s:pats.tagClose),
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" " Closing sequence for qtpl tags
-" " Ex:
-" " {%=uh Foo() %}
-" "             ^^
-" call s:sb.match('tag_def_close_block_plain',
-"   \ s:pb.make(s:pats.tagClose),
-"   \ 'nextgroup=' . s:sb.ref('tag_body_block_plain'),
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" call s:sb.region('tag_body_block_plain',
-"   \ s:pb.make('.'),
-"   \ s:pb.make(
-"     \ s:pats.tagOpen,
-"     \ '\_s*',
-"     \ s:pats.blockEnd . s:pats.blocks.plain,
-"     \ '\_s*',
-"     \ s:pats.tagClose
-"   \ ) . 'me=s-2',
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"     "
-"
-"
-" " Closing sequence for qtpl tags
-" " Ex:
-" " {%=uh Foo() %}
-" "             ^^
-" call s:sb.match('tag_def_close_block_go',
-"   \ s:pb.make(s:pats.tagClose),
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'skipwhite',
-"   \ 'skipnl'
-" \ )
-"
-" call s:sb.match('tag_def_keyword_inline',
-"   \ s:pb.make(
-"     \ s:pb.agrp(
-"       \ s:pats.tags.package,
-"       \ s:pats.tags.import,
-"       \ s:pats.tags.code
-"     \ )
-"   \ ),
-"   \ 'nextgroup=' . s:sb.ref('tag_def_inline'),
-"   \ 'skipwhite',
-"   \ 'skipnl',
-"   \ 'keepend',
-"   \ 'contained',
-" \ )
-"
-" call s:sb.cluster('tag_def_keyword', [
-"     \ 'tag_def_block_keyword_go',
-"     \ 'tag_def_block_keyword_plain',
-"     \ 'tag_def_keyword_inline'
-"   \ ]
-" \ )
-"
-" call s:sb.cluster('tag_close', [
-"     \ 'tag_def_close_block_go',
-"     \ 'tag_def_close_block_plain',
-"     \ 'tag_close_inline'
-"   \ ]
-" \ )
-"
-"
-" call s:sb.region('tag_def_inline',
-"   \ s:pb.make('.'),
-"   \ s:pb.make(
-"     \ s:pats.tagClose,
-"   \ ) . 'me=e-2',
-"   \ 'keepend',
-"   \ 'contained',
-"   \ 'contains=@qtpl_syn_go',
-"   \ 'skipwhite',
-"   \ 'nextgroup=' . s:sb.ref('tag_close_inline'),
-"   \ 'skipnl'
-" \ )
-
-" Build and execute all of the syntax rules
-" we defined above
 call s:sb.exec()
-
-" TODO: integrate highlight rules into sb
-hi def link qtpl_global               Comment
-hi def link qtpl_match_todo           Underlined
-
-hi def link qtpl_tag_open             SpecialChar
-hi def link qtpl_tag_close            SpecialChar
-"
-" hi def link qtpl_tag_error_no_mods              Error
-"
-" " old
-"
-" hi def link qtpl_tag_open                    SpecialChar
-" hi def link qtpl_tag_close                   SpecialChar
-" hi def link qtpl_tag_def_close_block_go          SpecialChar
-" hi def link qtpl_tag_def_close_block_plain       SpecialChar
-" hi def link qtpl_tag_close_inline            SpecialChar
-"
-" " hi def link qtpl_tag_mods                  String
-" hi def link qtpl_tag_mods_func               String
-" hi def link qtpl_tag_mods_plain              Number
-" hi def link qtpl_tag_mods_error              Error
-"
-" " hi def link qtpl_tag_def_keyword           Keyword
-" hi def link qtpl_tag_def_block_keyword       Keyword
-" hi def link qtpl_tag_def_block_keyword_go    Keyword
-" hi def link qtpl_tag_def_block_keyword_plain Keyword
-" hi def link qtpl_tag_def_keyword_inline      Keyword
-"
-" hi def link qtpl_tag_body_block_plain        Constant
-"
 let b:current_syntax = "qtpl"
 
 " vim: sw=2 ts=2 et

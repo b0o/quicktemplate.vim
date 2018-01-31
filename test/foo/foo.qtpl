@@ -1,28 +1,50 @@
+Foo
+
 {% package foo %}
 
 {% plain %}
-plain on the top level becomes
-a go comment
+	plain on the top level becomes
+	a go comment
 {% endplain %}
-
-{% interface bar {
-	Foo()
-} %}
 
 {% code
 	var a = "foobar"
 %}
 
-{% stripspace %}
-	asd
-{% endstripspace %}
+{% plain %}
+	global    plain
+{% endplain %}
+
+{% collapsespace %}
+	global    collapsespace
+{% endcollapsespace %}
+
+{% iface iQux {
+	Foo(a int)
+	Bar(a int, b string)
+} %}
 
 {% func abc() %}
-	{% code
-		var a = "lorem"
+	{% plain %}
+		func    plain
+		{%s "foo" %}
+	{% endplain %}
+	{% stripspace %}
+		func    stripspace
+	{% endstripspace %}
+
+	{% code a := []string{"lorem", "ipsum"}
+	mystr := ""
+	for s := range a {
+		mystr += s
+	}
 	%}
+	{%s mystr %}
 
 	{% if 1 == 1 %}
+		{% for i := 0; i < n; i++ %}
+				num{% space %}{%d i %}{% newline %}
+		{% endfor %}
 		bar
 	{% endif %}
 

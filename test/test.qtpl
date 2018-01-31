@@ -1,11 +1,6 @@
-All the lines outside func and code are just comments.
-TODO: This is a todo
-
-This package contains a test template
-
 {% package templates %}
 
-foo
+asd
 
 {% cat "templates" %}
 
@@ -17,44 +12,88 @@ abr
 )
 %}
 
+{% interface FooBar {
+	Qux(a int)
+} %}
+
+{% func Foo(a map[string]int) bool %}
+
+	{% if n > 0 %}
+		{% for i := 0; i < n; i++ %}
+				num{% space %}{%d i %}{% newline %}
+		{% endfor %}
+		bar
+	{% endif %}
+
+	{% for i := 0; i < n; i++ %}
+			num{% space %}{%d i %}{% newline %}
+	{% endfor %}
+
+	{% collapsespace %}
+		{%=j heading.foo() %}
+		<!--
+		{%s foo %}bar{%= qux() %}
+		-->
+		<div>
+			{% plain %}
+				This is plain text which ignores {% tags %}
+				<p>
+					HTML is valid if it's inside a function
+					block.
+				</p>
+			{% endplain %}
+
+			{% comment %}
+				This is a {% comment %}
+			{% endcomment %}
+
+			<!-- {%= foo.Bar() %} -->
+			<h2 {%s h2attrs %} ><a href="{%s page.href %}">{%= title() %}</a></h2>
+
+			My args are:
+
+			{% if len(a) == 0 %}
+				<b>no args!</b>
+
+			{% elseif len(a) == 1 %}
+				<b>a single arg</b>: {%= printArgs(0, &a[0]) %}
+
+			{% else %}
+				<b>multuple args</b>
+
+			{% endif %}
+
+		</div>
+
+		{% stripspace %}
+			Leading and trailing space between lines and tags is completely
+			removed unless {%space%} or {%newline%} is used
+		{% endstripspace %}
+
+		{% cat "test.qtpl" %}
+
+	{% endcollapsespace %}
+
+	<script>
+		{%= foo() %}
+		var a = {%s foo %}
+		console.log(a)
+	</script>
+
+{% endfunc %}
+
 {% code type FooArgs struct {
 	S string `foo:"bar"`
 	N int
 }
 %}
 
-{% comment %}
-	This {% will just %} output a string without
-	interpreting the {% tags %}
-{% endcomment %}
-
-asd
-
-{% func Foo(a map[string]int) bool %}
-	<div>
-		{% comment %}
-			This is a {% comment %}
-		{% endcomment %}
-		<h1> {%s title %} </h1>
-		<script>
-			var a = {%s foo %};
-			console.log(a)
-		</script>
-		My args are:
-		{% if len(a) == 0 %}
-			no args!
-		{% elseif len(a) == 1 %}
-			a single arg: {%= printArgs(0, &a[0]) %}
-		{% else %}
-			multuple args
-		{% endif %}
-	</div>
-	{% stripspace %}
-		Leading and trailing space between lines and tags is completely
-		removed unless {%space%} or {%newline%} is used
-	{% endstripspace %}
-	{% cat "test.qtpl" %}
-{% endfunc %}
-
-Another comment
+{% plain %}
+	This is plain text which ignores {% tags %}
+	<p>
+		HTML is valid if it's inside a function
+		block.
+	</p>
+	Otherwise, it's treated as a comment
+{% endplain %}
 
