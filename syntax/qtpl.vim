@@ -1,4 +1,4 @@
-" qtpl.vim: Vim syntax file for Quicktemplate syntax
+" qtpl.vim: Vim plugin for Quicktemplate syntax highlighting
 
 """ SETUP
 
@@ -43,10 +43,6 @@ let s:pats.tagClose = '%}'
 
 let s:pats.todo     = s:pb.grp(s:pb.agrp('TODO', 'FIXME', 'XXX', 'BUG', 'NOTE'), s:pb.opt(':'))
 
-" tags are singlular quicktemplate directives with no inner
-" container.
-let s:pats.tags           = {}
-
 " Modifiers for tags which specify output behavior of the tag
 " Similar to printf verbs
 let s:pats.plainTagMods =
@@ -69,82 +65,6 @@ let s:pats.funcTagMods =
   \ s:pb.opt(s:pb.agrp('q', 'j', 'u')),
   \ s:pb.opt('h')
 \ )
-
-""" EXTERNAL CLUSTERS
-" Define a cluster `html_container` which collects all possible
-" regions defined within syntax/html.vim and its children
-
-" syntax/html.vim
-call s:sb.clusteradd('html_container', [
-  \ '!cssStyle',
-  \ '!htmlBold',
-  \ '!htmlBoldItalic',
-  \ '!htmlBoldItalicUnderline',
-  \ '!htmlBoldUnderline',
-  \ '!htmlBoldUnderlineItalic',
-  \ '!htmlComment',
-  \ '!htmlCommentPart',
-  \ '!htmlCssDefinition',
-  \ '!htmlEndTag',
-  \ '!htmlEvent',
-  \ '!htmlEventDQ',
-  \ '!htmlEventSQ',
-  \ '!htmlH1',
-  \ '!htmlH2',
-  \ '!htmlH3',
-  \ '!htmlH4',
-  \ '!htmlH5',
-  \ '!htmlH6',
-  \ '!htmlHead',
-  \ '!htmlItalic',
-  \ '!htmlItalicBold',
-  \ '!htmlItalicBoldUnderline',
-  \ '!htmlItalicUnderline',
-  \ '!htmlItalicUnderlineBold',
-  \ '!htmlLink',
-  \ '!htmlPreAttr',
-  \ '!htmlPreProc',
-  \ '!htmlScriptTag',
-  \ '!htmlStrike',
-  \ '!htmlString',
-  \ '!htmlTag',
-  \ '!htmlTitle',
-  \ '!htmlUnderline',
-  \ '!htmlUnderlineBold',
-  \ '!htmlUnderlineBoldItalic',
-  \ '!htmlUnderlineItalic',
-  \ '!htmlUnderlineItalicBold',
-  \ '!javaScript',
-  \ '!javaScriptExpression',
-\ ])
-
-" syntax/javascript.vim
-call s:sb.clusteradd('html_container', [
-  \ '!javaScriptComment',
-  \ '!javaScriptFunctionFold',
-  \ '!javaScriptRegexpString',
-  \ '!javaScriptStringD',
-  \ '!javaScriptStringS',
-\ ])
-
-" syntax/css.vim
-call s:sb.clusteradd('html_container', [
-  \ '!cssAttrRegion',
-  \ '!cssAttributeSelector',
-  \ '!cssComment',
-  \ '!cssDefinition',
-  \ '!cssFontDescriptorBlock',
-  \ '!cssFontDescriptorFunction',
-  \ '!cssFunction',
-  \ '!cssInclude',
-  \ '!cssKeyFrameWrap',
-  \ '!cssMediaBlock',
-  \ '!cssPageWrap',
-  \ '!cssPseudoClassFn',
-  \ '!cssStringQ',
-  \ '!cssStringQQ',
-  \ '!cssURL',
-\ ])
 
 """ SYNTAX
 
@@ -253,12 +173,7 @@ call s:sb.clusteradd('tag_close',       ['tag_ph_close'])
 call s:sb.clusteradd('tag_start_close', ['tag_ph_close'])
 call s:sb.hi('tag_ph_close', 'SpecialChar')
 
-
-" \ ]
-" let s:pats.xblocks = [
-" blocks are pairs of quicktemplate tags (an opening tag and a closing tag)
-" which contain additional code
-let s:pats.blocks = [
+let s:pats.tags = [
   \ {
     \ 'name'          : 'func',
     \ 'containedin'   : ['global'],
@@ -434,9 +349,7 @@ let s:pats.blocks = [
   \ },
 \ ]
 
-let s:pats.blockEnd             = 'end'
-
-for obj in s:pats.blocks
+for obj in s:pats.tags
   " Predefine group names
   let prefix         = 'tag_' . obj.name
   let start_keyword  = prefix . '_start_keyword'
@@ -608,6 +521,82 @@ for obj in s:pats.blocks
   call s:sb.clusteradd('tag_end_close',   [end_close])
   call s:sb.hi(end_close, 'SpecialChar')
 endfor
+
+""" EXTERNAL CLUSTERS
+" Define a cluster `html_container` which collects all possible
+" regions defined within syntax/html.vim and its children
+
+" syntax/html.vim
+call s:sb.clusteradd('html_container', [
+  \ '!cssStyle',
+  \ '!htmlBold',
+  \ '!htmlBoldItalic',
+  \ '!htmlBoldItalicUnderline',
+  \ '!htmlBoldUnderline',
+  \ '!htmlBoldUnderlineItalic',
+  \ '!htmlComment',
+  \ '!htmlCommentPart',
+  \ '!htmlCssDefinition',
+  \ '!htmlEndTag',
+  \ '!htmlEvent',
+  \ '!htmlEventDQ',
+  \ '!htmlEventSQ',
+  \ '!htmlH1',
+  \ '!htmlH2',
+  \ '!htmlH3',
+  \ '!htmlH4',
+  \ '!htmlH5',
+  \ '!htmlH6',
+  \ '!htmlHead',
+  \ '!htmlItalic',
+  \ '!htmlItalicBold',
+  \ '!htmlItalicBoldUnderline',
+  \ '!htmlItalicUnderline',
+  \ '!htmlItalicUnderlineBold',
+  \ '!htmlLink',
+  \ '!htmlPreAttr',
+  \ '!htmlPreProc',
+  \ '!htmlScriptTag',
+  \ '!htmlStrike',
+  \ '!htmlString',
+  \ '!htmlTag',
+  \ '!htmlTitle',
+  \ '!htmlUnderline',
+  \ '!htmlUnderlineBold',
+  \ '!htmlUnderlineBoldItalic',
+  \ '!htmlUnderlineItalic',
+  \ '!htmlUnderlineItalicBold',
+  \ '!javaScript',
+  \ '!javaScriptExpression',
+\ ])
+
+" syntax/javascript.vim
+call s:sb.clusteradd('html_container', [
+  \ '!javaScriptComment',
+  \ '!javaScriptFunctionFold',
+  \ '!javaScriptRegexpString',
+  \ '!javaScriptStringD',
+  \ '!javaScriptStringS',
+\ ])
+
+" syntax/css.vim
+call s:sb.clusteradd('html_container', [
+  \ '!cssAttrRegion',
+  \ '!cssAttributeSelector',
+  \ '!cssComment',
+  \ '!cssDefinition',
+  \ '!cssFontDescriptorBlock',
+  \ '!cssFontDescriptorFunction',
+  \ '!cssFunction',
+  \ '!cssInclude',
+  \ '!cssKeyFrameWrap',
+  \ '!cssMediaBlock',
+  \ '!cssPageWrap',
+  \ '!cssPseudoClassFn',
+  \ '!cssStringQ',
+  \ '!cssStringQQ',
+  \ '!cssURL',
+\ ])
 
 call s:sb.exec()
 let b:current_syntax = "qtpl"
