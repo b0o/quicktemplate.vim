@@ -30,6 +30,7 @@ unlet! b:current_syntax
 " Instantiate new builder objects
 let s:pb = pb#new('+')
 let s:sb = sb#new('qtpl_')
+let g:sb = s:sb
 
 """ PATTERNS
 
@@ -286,7 +287,7 @@ let s:pats.tags = [
   \ },
   \ {
     \ 'name'          : 'switch',
-    \ 'containedin'   : ['@func', '@for', '@if', '@switch'],
+    \ 'containedin'   : ['@block'],
     \ 'clusters'      : ['block', 'switch'],
     \ 'start_keyword' : 'switch',
     \ 'end_keyword'   : 'endswitch',
@@ -297,7 +298,7 @@ let s:pats.tags = [
   \ },
   \ {
     \ 'name'          : 'case',
-    \ 'containedin'   : ['@switch'],
+    \ 'containedin'   : ['@block'],
     \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'case',
     \ 'start_contents_start'   : s:pb.make('.'),
@@ -306,13 +307,13 @@ let s:pats.tags = [
   \ },
   \ {
     \ 'name'          : 'default',
-    \ 'containedin'   : ['@switch'],
+    \ 'containedin'   : ['@block'],
     \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'default',
   \ },
   \ {
     \ 'name'          : 'for',
-    \ 'containedin'   : ['@func', '@for', '@if', '@switch'],
+    \ 'containedin'   : ['@block'],
     \ 'clusters'      : ['block', 'for'],
     \ 'start_keyword' : 'for',
     \ 'end_keyword'   : 'endfor',
@@ -322,8 +323,20 @@ let s:pats.tags = [
     \ 'start_contents_contains': ['@syn_go'],
   \ },
   \ {
+    \ 'name'          : 'break',
+    \ 'containedin'   : ['@block'],
+    \ 'clusters'      : ['inline'],
+    \ 'start_keyword' : 'break',
+  \ },
+  \ {
+    \ 'name'          : 'continue',
+    \ 'containedin'   : ['@block'],
+    \ 'clusters'      : ['inline'],
+    \ 'start_keyword' : 'continue',
+  \ },
+  \ {
     \ 'name'          : 'if',
-    \ 'containedin'   : ['@func', '@for', '@if', '@switch'],
+    \ 'containedin'   : ['@block'],
     \ 'clusters'      : ['block', 'if'],
     \ 'start_keyword' : 'if',
     \ 'end_keyword'   : 'endif',
@@ -334,13 +347,13 @@ let s:pats.tags = [
   \ },
   \ {
     \ 'name'          : 'else',
-    \ 'containedin'   : ['@if'],
+    \ 'containedin'   : ['@block'],
     \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'else',
   \ },
   \ {
     \ 'name'          : 'elseif',
-    \ 'containedin'   : ['@if'],
+    \ 'containedin'   : ['@block'],
     \ 'clusters'      : ['inline'],
     \ 'start_keyword' : 'elseif',
     \ 'start_contents_start'   : s:pb.make('.'),
