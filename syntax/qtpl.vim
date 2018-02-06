@@ -87,6 +87,7 @@ call s:sb.hi('todo', 'TODO')
 call s:sb.match('global_tag_open',
   \ s:pb.make(s:pats.tagOpen),
   \ s:sb.contained('global'),
+  \ s:sb.next('@tag_start_keyword'),
   \ 'skipwhite',
   \ 'skipempty',
 \ )
@@ -471,7 +472,7 @@ for obj in s:pats.tags
       \ obj.end_keyword,
       \ '\_s*',
       \ s:pats.tagClose
-    \ ) . 'me=s-2',
+    \ ) . 'me=s-1',
     \ s:sb.contained(),
     \ s:sb.next(end_open),
     \ body_contains,
