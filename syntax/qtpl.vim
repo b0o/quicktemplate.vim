@@ -412,7 +412,7 @@ for obj in s:pats.tags
   " {% plain %}
   "    ^^^^^
   call s:sb.match(start_keyword,
-    \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen . '\_s*')), obj.start_keyword, s:pb.pla('\W'), '\_s*'),
+    \ s:pb.make(s:pb.plb(s:pb.grp(s:pats.tagOpen . '\_s*')), obj.start_keyword),
     \ s:sb.next(start_keyword_nextgroup),
     \ s:sb.lcontained(obj.containedin),
     \ 'skipwhite',
