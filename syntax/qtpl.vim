@@ -87,7 +87,6 @@ call s:sb.hi('todo', 'TODO')
 call s:sb.match('global_tag_open',
   \ s:pb.make(s:pats.tagOpen),
   \ s:sb.contained('global'),
-  \ s:sb.next('@tag_start_keyword'),
   \ 'skipwhite',
   \ 'skipempty',
 \ )
