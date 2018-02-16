@@ -42,7 +42,7 @@ let s:pats.eof      = '\%$'
 let s:pats.tagOpen  = '{%'
 let s:pats.tagClose = '%}'
 
-let s:pats.todo     = s:pb.grp(s:pb.agrp('TODO', 'FIXME', 'XXX', 'BUG', 'NOTE'), s:pb.opt(':'))
+let s:pats.todo = s:pb.grp(s:pb.agrp('TODO', 'FIXME', 'XXX', 'BUG', 'NOTE'), s:pb.opt(':'))
 
 " Modifiers for tags which specify output behavior of the tag
 " Similar to printf verbs
@@ -74,12 +74,13 @@ call s:sb.region('global',
   \ s:pb.make(s:pats.bof),
   \ s:pb.make(s:pats.eof),
 \ )
+call s:sb.clusteradd('comment', ['global'])
 call s:sb.hi('global', 'Comment')
 
-" Keywords like TODO in the outer region
+" Keywords like TODO in comment regions
 call s:sb.match('todo',
   \ s:pb.make(s:pats.todo),
-  \ s:sb.contained('global'),
+  \ s:sb.contained('@comment'),
 \ )
 call s:sb.hi('todo', 'TODO')
 
