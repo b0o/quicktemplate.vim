@@ -44,6 +44,8 @@ let s:pats.tagClose = '%}'
 
 let s:pats.todo = s:pb.grp(s:pb.agrp('TODO', 'FIXME', 'XXX', 'BUG', 'NOTE'), s:pb.opt(':'))
 
+let s:pats.commentHeading = s:pb.grp(s:pb.plb(s:pb.grp('^\s*')), '#\+', '.*')
+
 " Modifiers for tags which specify output behavior of the tag
 " Similar to printf verbs
 let s:pats.plainTagMods =
@@ -83,6 +85,13 @@ call s:sb.match('todo',
   \ s:sb.contained('@comment'),
 \ )
 call s:sb.hi('todo', 'TODO')
+
+" Heading lines in comment regions
+call s:sb.match('comment_heading',
+  \ s:pb.make(s:pats.commentHeading),
+  \ s:sb.contained('@comment'),
+\ )
+call s:sb.hi('comment_heading', 'Underlined')
 
 " Opening qtpl tags found within the global scope
 call s:sb.match('global_tag_open',
