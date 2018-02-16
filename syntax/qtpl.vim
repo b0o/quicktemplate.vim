@@ -237,7 +237,7 @@ let s:pats.tags = [
   \ {
     \ 'name'          : 'comment',
     \ 'containedin'   : ['global', '@block', '@html_container'],
-    \ 'clusters'      : ['blockcomment'],
+    \ 'clusters'      : ['blockcomment', 'comment'],
     \ 'start_keyword' : 'comment',
     \ 'end_keyword'   : 'endcomment',
     \ 'body_args'     : ['fold'],
@@ -246,7 +246,7 @@ let s:pats.tags = [
   \ {
     \ 'name'          : 'plain_global',
     \ 'containedin'   : ['global'],
-    \ 'clusters'      : ['blockcomment'],
+    \ 'clusters'      : ['blockcomment', 'comment'],
     \ 'start_keyword' : 'plain',
     \ 'end_keyword'   : 'endplain',
     \ 'body_args'     : ['fold'],
